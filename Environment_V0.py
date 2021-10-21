@@ -1,38 +1,36 @@
-import numpy as np
 import networkx as nx
 import csv
 from collections import deque
 import random
 
+'''
+허브 DATA : self.hub_data[코드][대기열, 최대용량, 이름, 처리시간]
+배송 DATA : [고유번호(1xxxxxx)][출발지, 도착지, 경유지(list)]
+'''
 
 class LogisticNetwork:
     def __init__(self):
         self.network = nx.Graph()
         f1 = open('road_test_sample.csv', 'r')
         f2 = open('hub_test_sample.csv', 'r')
-        self.road_network_data = csv.reader(f1)
-        self.hub_data = csv.reader(f2)                      # !허브 관련 정보를 하나의 딕셔너리로 묶어야 함
+        self.data_road_network = csv.reader(f1)
+        self.data_hub = csv.reader(f2)
         self.hub_num = 0
-        self.hub_codes = list()
-        self.hub_max = list()
-        self.hub_name = list()
-        self.hub_classification_time = list()
-        self.hub_queue = {}
+        self.hub_data = {}
+        self.hub_ground_codes = list()
 
-    def reset_network(self):
+    def reset_network(self):            # 시뮬레이션 초기화             ## 구현 완료
         next(self.hub_data)
         for row in self.hub_data:
-            self.hub_codes.append(row[0])
-            self.hub_queue[row[0]] = deque()
-            self.hub_max = int(row[1])
-            self.hub_name = row[2]
-            self.hub_classification_time = row[3]
-        self.hub_num = len(self.hub_codes)
+            self.hub_data[row[1]] = [deque(), int(row[2]), row[3], int(row[4])]            # 코드:[대기열, 최대용량, 이름, 처리시간]
+            if row[0] == 'G':
+                self.hub_ground_codes.append(row[1])
+        self.hub_num = len(self.hub_data.keys())
 
     def sample_maker(self, num):        # 무작위로 샘플 생성[출발지, 도착지]      ## 구현 완료
         sample = list()
         for _ in range(num):
-            sample.append(random.sample(self.hub_codes, 2))
+            sample.append(random.sample(self.hub_ground_codes, 2))
         return sample
 
     def update_weight(self):    # 교통상황 반영       -->  추후 예정(필수 X)
@@ -47,16 +45,16 @@ class LogisticNetwork:
 class HubProcess(LogisticNetwork):
     def hub_load(self, hub, sample):
         for data in sample:
-            self.hub_queue[hub].append([data, 0])
+            self.hub_data[hub][0].append([data, 0])
 
     def hub_classification(self, hub):
-        for parcel in self.hub_queue[hub]:
+        for parcel in self.hub_data[hub][0]:
             parcel[0][1] += 1
 
     def hub_exit(self, hub, ):
         exit = list()
         while True:
-            if self.hub_queue[0][1]
+            if self.hub_data[hub][1] >
 
 
 class RoadProcess(LogisticNetwork):
