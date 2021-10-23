@@ -1,7 +1,7 @@
 # Dynamin_Logistics_Alpha
 
 parcel code = time code(3 digits) + 'P' + 고유번호(7 digits)    -->     000P1000000
-hub code = type code(M : main hub, S : sub hub, D : destination) + 지역 번호(2 digits) + 'I' + 고유번호(2 digits)     -->     H00I00
+hub code = type code(M : main hub, S : sub hub, D : destination) + 지역 번호(2 digits) + 'K' + 고유번호(2 digits)     -->     H00I00
 
 in Enviroment.py :
   self.hub_data = {hub code : [대기열(deque), 허브 최대용량, name, classification time]}   -->   대기열 = [parcel_code, process num]
