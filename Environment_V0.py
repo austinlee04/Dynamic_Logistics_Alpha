@@ -54,7 +54,7 @@ class HubProcess(LogisticNetwork):
     def hub_exit(self, hub, ):
         exit = list()
         while True:
-            if self.hub_data[hub][1] >
+            if self.hub_data[hub][1] > self.hub_data[hub][]
 
 
 class RoadProcess(LogisticNetwork):
