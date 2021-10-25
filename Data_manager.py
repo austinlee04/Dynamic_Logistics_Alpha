@@ -3,17 +3,21 @@ import random
 
 MAX = 10 ** 6
 
+
 class DataManager:
     def __init__(self):
-        self.route_log = dict()
-        self.time_log = dict()
+        self.parcel = dict()            # code : [state, dep, arv, route]
+        self.parcel_expect = dict()
+        self.parcel_log = dict()
 
     def sample_maker(self, nodes, num, time):
-        sample = list()
         for i in range(1,num+1):
             parcel_code = format(time, '03')+'P'+str(MAX + i)
-            route = random.sample(self.nodes, 2)
-            sample.append(route)
-            self.route_log[parcel_code] = [route[0],'','','',route[1],0]
-            self.time_log[parcel_code] = [time,0,0,0,0,0,0,0]
-        return sample
+            dep, arv = random.sample(nodes, 2)
+            self.parcel[parcel_code] = ['G', [dep, '', '', '', arv]]
+            self.parcel_expect[parcel_code] = [time, dep, arv, ['', 0], ['', 0], ['', 0], 0]
+            self.parcel_log[parcel_code] = [time, [dep, 0, 0], ['',0,0], ['',0,0], ['',0,0], [arv, 0], 0]
+            # [출발시간, [위치, 도착시간, 출발시간], 비용]
+
+    def route_manager(self):
+        for sample in

@@ -27,12 +27,6 @@ class LogisticNetwork:
                 self.hub_ground_codes.append(row[1])
         self.hub_num = len(self.hub_data.keys())
 
-    def sample_maker(self, num):        # 무작위로 샘플 생성[출발지, 도착지]      ## 구현 완료
-        sample = list()
-        for _ in range(num):
-            sample.append(random.sample(self.hub_ground_codes, 2))
-        return sample
-
     def update_weight(self):    # 교통상황 반영       -->  추후 예정(필수 X)
         pass
 
@@ -54,8 +48,14 @@ class HubProcess(LogisticNetwork):
     def hub_exit(self, hub, ):
         exit = list()
         while True:
-            if self.hub_data[hub][1] > self.hub_data[hub][]
+            if self.hub_data[hub][1] > self.hub_data[hub]:
+                pass
+
 
 
 class RoadProcess(LogisticNetwork):
-    pass
+    def hub_route_finder(self, dep, arv):
+        
+
+    def route_finder(self):
+        pass
