@@ -55,7 +55,7 @@ class HubProcess(LogisticNetwork):
 
 class RoadProcess(LogisticNetwork):
     def hub_route_finder(self, dep, arv):
-        
+        pass
 
     def route_finder(self):
         pass
