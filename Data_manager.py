@@ -1,9 +1,10 @@
 import random
+import csv
 # try to use pandas
 
 MAX = 10 ** 6
 
-
+# 허브 처리시간 = 18
 class DataManager:
     def __init__(self):
         self.parcel = dict()            # code : [state, dep, arv, route]
@@ -16,9 +17,15 @@ class DataManager:
             dep, arv = random.sample(nodes, 2)
             self.parcel[parcel_code] = ['G', 0, 0, [[dep, False], ['',False], ['',False], ['',False], [arv, False]]]
                                         # [위치, 진행단계, 총 단계, [경로[위치, 완료여부]]
-            self.parcel_expect[parcel_code] = [time, dep, arv, ['', 0], ['', 0], ['', 0], 0]
+            self.parcel_expect[parcel_code] = [time, dep, arv, 0, ['', 0], ['', 0], ['', 0], 0]
             self.parcel_log[parcel_code] = [[dep, time], ['',0,0], ['',0,0], ['',0,0], [arv, 0], 0]
             # [출발시간, [위치, 도착시간, 출발시간], 비용]
 
-    def route_manager(self):
-        for sample in
+    def save_log(self, name):
+        f = open(name+'.csv', 'w', newline='')
+        wr = csv.writer(f)
+
+        for key in self.parcel_log.keys():
+            data = self.parcel_log[key]
+            wr.writerow(data)
+        f.close()

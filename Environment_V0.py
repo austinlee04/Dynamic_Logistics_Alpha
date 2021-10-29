@@ -9,10 +9,10 @@ import random
 '''
 
 class LogisticNetwork:
-    def __init__(self):
+    def __init__(self, road_file, hub_file):
         self.network = nx.Graph()
-        f1 = open('road_test_sample.csv', 'r')
-        f2 = open('hub_test_sample.csv', 'r')
+        f1 = open(road_file, 'r')
+        f2 = open(hub_file, 'r')
         self.data_road_network = csv.reader(f1)
         self.data_hub = csv.reader(f2)
         self.hub_num = 0
@@ -50,12 +50,3 @@ class HubProcess(LogisticNetwork):
         while True:
             if self.hub_data[hub][1] > self.hub_data[hub]:
                 pass
-
-
-
-class RoadProcess(LogisticNetwork):
-    def hub_route_finder(self, dep, arv):
-        pass
-
-    def route_finder(self):
-        pass
