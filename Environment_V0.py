@@ -8,24 +8,31 @@ import random
 배송 DATA : [고유번호(1xxxxxx)][출발지, 도착지, 경유지(list)]
 '''
 
+
 class LogisticNetwork:
-    def __init__(self, road_file, hub_file):
+    def __init__(self):
         self.network = nx.Graph()
-        f1 = open(road_file, 'r')
-        f2 = open(hub_file, 'r')
-        self.data_road_network = csv.reader(f1)
-        self.data_hub = csv.reader(f2)
+        self.data_road = list()
+        self.data_hub = list()
         self.hub_num = 0
         self.hub_data = {}
         self.hub_ground_codes = list()
+        self.cost_chart = list()
 
-    def reset_network(self):            # 시뮬레이션 초기화             ## 구현 완료
-        next(self.hub_data)
-        for row in self.hub_data:
-            self.hub_data[row[1]] = [deque(), int(row[2]), row[3], int(row[4])]            # 코드:[대기열, 최대용량, 이름, 처리시간]
-            if row[0] == 'G':
-                self.hub_ground_codes.append(row[1])
+    def reset_network(self, road_file, hub_file):            # 시뮬레이션 초기화             ## 구현 완료
+        f1 = open(road_file, 'r')
+        f2 = open(hub_file, 'r')
+        self.data_road = csv.reader(f1)
+        self.data_hub = csv.reader(f2)
+        next(self.data_hub)
+        for row in self.data_hub:
+            self.hub_data[row[0]] = [deque(), int(row[1]), int(row[4]), row[2], row[3]]
+            # 이름:[대기열, 최대용량, 처리시간, 상위허브, 연결도로]
+            if row[1] == 0:
+                self.hub_ground_codes.append(row[0])
         self.hub_num = len(self.hub_data.keys())
+        self.cost_chart = [[0 for _ in range(self.hub_num)] for _ in range(self.hub_num)]
+        # [출발지][도착지]
 
     def update_weight(self):    # 교통상황 반영       -->  추후 예정(필수 X)
         pass
@@ -36,17 +43,18 @@ class LogisticNetwork:
             cost += nx.shortest_path_length(self.network, source=path[i], target=path[i+1], weight='weight')
         return cost
 
-class HubProcess(LogisticNetwork):
+# 허브에서의 이동 관련 함수들
+
     def hub_load(self, hub, sample):
-        for data in sample:
-            self.hub_data[hub][0].append([data, 0])
+        self.hub_data[hub][0].append([sample, 0])
 
     def hub_classification(self, hub):
-        for parcel in self.hub_data[hub][0]:
-            parcel[0][1] += 1
-
-    def hub_exit(self, hub, ):
-        exit = list()
-        while True:
-            if self.hub_data[hub][1] > self.hub_data[hub]:
-                pass
+        done = list()
+        for i in range(self.hub_data[hub][1]):
+            if not self.hub_data[hub][0][i]:
+                return
+            elif self.hub_data[hub][0][i][1] == self.hub_data[hub][2]:
+                done.append(self.hub_data[hub][0].popleft()[0])
+                # 허브 탈출
+            else:
+                self.hub_data[hub][0][i][1] += 1
