@@ -1,11 +1,10 @@
 import networkx as nx
 import csv
 from collections import deque
-import random
 
 '''
 허브 DATA : self.hub_data[코드][대기열, 최대용량, 이름, 처리시간]
-배송 DATA : [고유번호(1xxxxxx)][출발지, 도착지, 경유지(list)]
+배송 DATA : [고유번호][출발지, 도착지, 경유지(list)]
 '''
 
 
@@ -17,7 +16,7 @@ class LogisticNetwork:
         self.hub_num = 0
         self.hub_data = {}
         self.hub_ground_codes = list()
-        self.cost_chart = list()
+        self.traffic = list()
 
     def reset_network(self, road_file, hub_file):            # 시뮬레이션 초기화             ## 구현 완료
         f1 = open(road_file, 'r')
@@ -26,12 +25,12 @@ class LogisticNetwork:
         self.data_hub = csv.reader(f2)
         next(self.data_hub)
         for row in self.data_hub:
-            self.hub_data[row[0]] = [deque(), int(row[1]), int(row[4]), row[2], row[3]]
-            # 이름:[대기열, 최대용량, 처리시간, 상위허브, 연결도로]
+            self.hub_data[row[0]] = [deque(), int(row[1]), int(row[4]), row[2], row[3], int(row[5])]
+            # 이름:[대기열, 최대용량, 처리시간, 상위허브, 연결도로, 번호]
             if row[1] == 0:
                 self.hub_ground_codes.append(row[0])
         self.hub_num = len(self.hub_data.keys())
-        self.cost_chart = [[0 for _ in range(self.hub_num)] for _ in range(self.hub_num)]
+        self.traffic = [[0 for _ in range(self.hub_num)] for _ in range(self.hub_num)]
         # [출발지][도착지]
 
     def update_weight(self):    # 교통상황 반영       -->  추후 예정(필수 X)

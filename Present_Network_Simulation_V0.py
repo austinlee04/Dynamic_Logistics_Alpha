@@ -30,6 +30,7 @@ for time in range(time_max):
             if not data.parcel[key][3][0][1]:       # 출발 안 했을 경우
                 data.parcel[key][0] = 'R'
                 data.parcel[key][3][0][1] = True
+                env.traffic[env.hub_data[data.parcel[key][3][0][0]][5]][env.hub_data[data.parcel[key][3][1][0]][5]] += 1
             else:                                   # 배송 완료되었을 경우
                 data.parcel[key][3][4][1] = True
                 data.parcel_log[key][3][1] = time
@@ -46,5 +47,9 @@ for time in range(time_max):
         elif data.parcel[key][0] == 'H':
             pass
             # 허브 처리 과정(env 모듈에서 처리)
+    for key in data.parcel.keys():
+        for i in range(4):
+            if not data.parcel_cost[key][i]:
+                data.parcel_cost[key][i] = [env.hub_data[data.parcel[key][3][0][0]][5]][env.hub_data[data.parcel[key][3][1][0]][5]]
 
 data.save_log('HnS_simulation_211030_01')
