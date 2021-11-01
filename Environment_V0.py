@@ -16,6 +16,7 @@ class LogisticNetwork:
         self.hub_num = 0
         self.hub_data = {}
         self.hub_ground_codes = list()
+        self.hub_sky_codes = list()
         self.traffic = list()
 
     def reset_network(self, road_file, hub_file):            # 시뮬레이션 초기화             ## 구현 완료
@@ -29,9 +30,14 @@ class LogisticNetwork:
             # 이름:[대기열, 최대용량, 처리시간, 상위허브, 연결도로, 번호]
             if row[1] == 0:
                 self.hub_ground_codes.append(row[0])
+            else:
+                self.hub_sky_codes.append(row[0])
         self.hub_num = len(self.hub_data.keys())
         self.traffic = [[0 for _ in range(self.hub_num)] for _ in range(self.hub_num)]
         # [출발지][도착지]
+
+        for i in range(len(self.data_road)):
+            pass
 
     def update_weight(self):    # 교통상황 반영       -->  추후 예정(필수 X)
         pass
