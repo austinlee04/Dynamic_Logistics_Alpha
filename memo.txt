@@ -4,5 +4,8 @@
 
 21.11.03
 할 일 :
-- sim 파일에서 허브 상차 구현         ##
+- sim 파일에서 허브 상차 구현         ## done
 - edge 추가하는 함수(env)           ## done
+다음에 할 일 :
+- env.traffic list out of range 에러 해결
+- sim 완성
