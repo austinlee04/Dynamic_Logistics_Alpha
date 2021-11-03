@@ -52,6 +52,9 @@ for time in range(time_max):
             if not data.parcel_cost[key][i]:
                 data.parcel_cost[key][i] = [env.hub_data[data.parcel[key][3][0][0]][5]][env.hub_data[data.parcel[key][3][1][0]][5]]
     for key in env.hub_sky_codes:
-        env.hub_classification(key)
+        done = env.hub_classification(key)
+        for k in done:
+            data.parcel[k][0] = 'R'
+            # 허브 상차
 
 data.save_log('HnS_simulation_211030_01')
