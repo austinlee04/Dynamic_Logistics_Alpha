@@ -1,8 +1,8 @@
 21.10.31
 할 일 : (비용 계산) 구현
-다음에 할 일 : sim 파일에서 hub_classification 명령어 수행하도록 해야 함.
+다음에 할 일 : sim 파일에서 hub_classification 명령어 수행하도록 해야 함.       ## done
 
 21.11.03
 할 일 :
-- sim 파일에서 허브 상차 구현
-- edge 추가하는 함수(env)  
+- sim 파일에서 허브 상차 구현         ##
+- edge 추가하는 함수(env)           ## done

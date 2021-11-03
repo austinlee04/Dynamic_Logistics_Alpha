@@ -25,11 +25,17 @@ env.reset_network('data_road.csv', 'data_hub.csv')
 for time in range(time_max):
     data.sample_maker(env.hub_ground_codes, random.randint(10**4, 10**5), time)
     for key in data.parcel.keys():            # sample = [코드, 상태, 진행단계, 완료단계]
+        print(data.parcel[key])
         # Ground, Road, Hub
         if data.parcel[key][0] == 'G':        # 출발지 또는 도착지
+            path = path_finder(data.parcel[key][3][0][0], data.parcel[key][3][-1][0])
+            data.parcel[key][3][1][0] = path[0]
+            data.parcel[key][3][2][0] = path[1]
+            data.parcel[key][3][3][0] = path[2]
             if not data.parcel[key][3][0][1]:       # 출발 안 했을 경우
                 data.parcel[key][0] = 'R'
                 data.parcel[key][3][0][1] = True
+
                 env.traffic[env.hub_data[data.parcel[key][3][0][0]][5]][env.hub_data[data.parcel[key][3][1][0]][5]] += 1
             else:                                   # 배송 완료되었을 경우
                 data.parcel[key][3][4][1] = True

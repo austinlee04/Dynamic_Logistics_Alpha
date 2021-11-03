@@ -20,15 +20,16 @@ class LogisticNetwork:
         self.traffic = list()
 
     def reset_network(self, road_file, hub_file):            # 시뮬레이션 초기화             ## 구현 완료
-        f1 = open(road_file, 'r')
-        f2 = open(hub_file, 'r')
+        f1 = open(road_file, 'r', encoding='UTF-8')
+        f2 = open(hub_file, 'r', encoding='UTF-8')
         self.data_road = csv.reader(f1)
         self.data_hub = csv.reader(f2)
         next(self.data_hub)
         for row in self.data_hub:
-            self.hub_data[row[0]] = [deque(), int(row[1]), int(row[4]), row[2], row[3], int(row[5])]
-            # 이름:[대기열, 최대용량, 처리시간, 상위허브, 연결도로, 번호]
-            if row[1] == 0:
+            self.hub_data[row[0]] = [deque(), int(row[1]), int(row[4]), row[2], int(row[5])]
+            # 이름:[대기열, 최대용량, 처리시간, 상위허브, 번호]
+            self.network.add_edge(row[0], row[3].split()[1], weight=15)
+            if row[1] == '0':
                 self.hub_ground_codes.append(row[0])
             else:
                 self.hub_sky_codes.append(row[0])
@@ -36,8 +37,26 @@ class LogisticNetwork:
         self.traffic = [[0 for _ in range(self.hub_num)] for _ in range(self.hub_num)]
         # [출발지][도착지]
 
-        for i in range(len(self.data_road)):
-            pass
+        name = list()
+        dist = list()
+        n = 1
+        for row in self.data_road:
+            if n == 1:
+                for value in row:
+                    if value:
+                        name.append(value)
+            else:
+                for value in row:
+                    if value:
+                        dist.append(value)
+                for i in range(1, len(name)):
+                    if dist[i] == '0':
+                        continue
+                    self.network.add_edge(name[i - 1], name[i], weight=float(dist[i]))
+                name = []
+                dist = []
+
+            n *= -1
 
     def update_weight(self):    # 교통상황 반영       -->  추후 예정(필수 X)
         pass
