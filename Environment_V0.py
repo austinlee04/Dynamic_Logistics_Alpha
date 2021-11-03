@@ -34,7 +34,7 @@ class LogisticNetwork:
             else:
                 self.hub_sky_codes.append(row[0])
         self.hub_num = len(self.hub_data.keys())
-        self.traffic = [[0 for _ in range(self.hub_num)] for _ in range(self.hub_num)]
+        self.traffic = [[0 for _ in range(self.hub_num+1)] for _ in range(self.hub_num+1)]
         # [출발지][도착지]
 
         name = list()
