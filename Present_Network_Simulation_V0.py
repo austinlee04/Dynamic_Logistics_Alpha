@@ -1,3 +1,5 @@
+import networkx as nx
+
 import Environment_V0
 import Data_manager
 import random
@@ -23,20 +25,19 @@ def path_finder(dep, arv):
 env.reset_network('data_road.csv', 'data_hub.csv')
 
 for time in range(time_max):
-    data.sample_maker(env.hub_ground_codes, random.randint(10**4, 10**5), time)
+    data.sample_maker(env.hub_ground_codes, random.randint(10, 40), time)
     for key in data.parcel.keys():            # sample = [코드, 상태, 진행단계, 완료단계]
-        print(data.parcel[key])
         # Ground, Road, Hub
         if data.parcel[key][0] == 'G':        # 출발지 또는 도착지
-            path = path_finder(data.parcel[key][3][0][0], data.parcel[key][3][-1][0])
-            data.parcel[key][3][1][0] = path[0]
-            data.parcel[key][3][2][0] = path[1]
-            data.parcel[key][3][3][0] = path[2]
             if not data.parcel[key][3][0][1]:       # 출발 안 했을 경우
+                path = path_finder(data.parcel[key][3][0][0], data.parcel[key][3][-1][0])
+                data.parcel[key][3][1][0] = path[0]
+                data.parcel[key][3][2][0] = path[1]
+                data.parcel[key][3][3][0] = path[2]
                 data.parcel[key][0] = 'R'
                 data.parcel[key][3][0][1] = True
-
-                env.traffic[env.hub_data[data.parcel[key][3][0][0]][5]][env.hub_data[data.parcel[key][3][1][0]][5]] += 1
+                data.parcel[key][2] = nx.shortest_path_length(env.network, data.parcel[key][3][0][0], data.parcel[key][3][4][0])
+                env.traffic[env.hub_data[data.parcel[key][3][0][0]][4]][env.hub_data[data.parcel[key][3][1][0]][4]] += 1
             else:                                   # 배송 완료되었을 경우
                 data.parcel[key][3][4][1] = True
                 data.parcel_log[key][3][1] = time
@@ -50,17 +51,17 @@ for time in range(time_max):
                         # 허브 하차
             else:
                 data.parcel[key][1] += 1
-        elif data.parcel[key][0] == 'H':
-            pass
-            # 허브 처리 과정(env 모듈에서 처리)
+        print(key, data.parcel[key])
+
     for key in data.parcel.keys():
         for i in range(4):
+            print(key, data.parcel_cost[key])
             if not data.parcel_cost[key][i]:
-                data.parcel_cost[key][i] = [env.hub_data[data.parcel[key][3][0][0]][5]][env.hub_data[data.parcel[key][3][1][0]][5]]
+                data.parcel_cost[key][i] = [env.hub_data[data.parcel[key][3][0][0]][4]][env.hub_data[data.parcel[key][3][1][0]][4]]
     for key in env.hub_sky_codes:
         done = env.hub_classification(key)
         for k in done:
             data.parcel[k][0] = 'R'
             # 허브 상차
 
-data.save_log('HnS_simulation_211030_01')
+data.save_log('HnS_simulation_21104_01')
