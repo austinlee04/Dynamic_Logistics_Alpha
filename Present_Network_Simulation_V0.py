@@ -1,5 +1,5 @@
 import networkx as nx
-
+import matplotlib.pyplot as plt
 import Environment_V0
 import Data_manager
 import random
@@ -23,7 +23,9 @@ def path_finder(dep, arv):
 
 
 env.reset_network('data_road.csv', 'data_hub.csv')
-
+for row in nx.connected_components(env.network):
+    print(row)
+'''
 for time in range(time_max):
     data.sample_maker(env.hub_ground_codes, random.randint(10, 40), time)
     for key in data.parcel.keys():            # sample = [코드, 상태, 진행단계, 완료단계]
@@ -65,3 +67,4 @@ for time in range(time_max):
             # 허브 상차
 
 data.save_log('HnS_simulation_21104_01')
+'''
