@@ -25,10 +25,13 @@ class LogisticNetwork:
         self.data_road = csv.reader(f1)
         self.data_hub = csv.reader(f2)
         next(self.data_hub)
+        next(self.data_road)
         for row in self.data_hub:
+            if not row[0]:
+                break
             self.hub_data[row[0]] = [deque(), int(row[1]), int(row[4]), row[2], int(row[5])]
             # 이름:[대기열, 최대용량, 처리시간, 상위허브, 번호]
-            self.network.add_edge(row[0], row[3].split()[1], weight=15)
+            self.network.add_edge(row[0], row[3].split()[1], weight=15.0)
             if row[1] == '0':
                 self.hub_ground_codes.append(row[0])
             else:

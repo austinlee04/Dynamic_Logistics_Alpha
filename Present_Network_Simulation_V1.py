@@ -1,12 +1,12 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-import Environment_V0
-import Data_manager
+import Environment_V1
+import Data_manager_V1
 import random
 
 
-env = Environment_V0.LogisticNetwork()
-data = Data_manager.DataManager()
+env = Environment_V1.LogisticNetwork()
+data = Data_manager_V1.DataManager()
 
 time_max = int(input('max time : '))
 
@@ -22,10 +22,8 @@ def path_finder(dep, arv):
 # 허브 통과 : 메인허브(6시간) / 서브허브(3시간)
 
 
-env.reset_network('data_road.csv', 'data_hub.csv')
-for row in nx.connected_components(env.network):
-    print(row)
-'''
+env.reset_network('data/data_road_V3.csv', 'data/data_hub_V3.csv')
+
 for time in range(time_max):
     data.sample_maker(env.hub_ground_codes, random.randint(10, 40), time)
     for key in data.parcel.keys():            # sample = [코드, 상태, 진행단계, 완료단계]
@@ -38,7 +36,7 @@ for time in range(time_max):
                 data.parcel[key][3][3][0] = path[2]
                 data.parcel[key][0] = 'R'
                 data.parcel[key][3][0][1] = True
-                data.parcel[key][2] = nx.shortest_path_length(env.network, data.parcel[key][3][0][0], data.parcel[key][3][4][0])
+                data.parcel[key][2] = nx.shortest_path_length(env.network, data.parcel[key][3][0][0], data.parcel[key][3][1][0])
                 env.traffic[env.hub_data[data.parcel[key][3][0][0]][4]][env.hub_data[data.parcel[key][3][1][0]][4]] += 1
             else:                                   # 배송 완료되었을 경우
                 data.parcel[key][3][4][1] = True
@@ -53,13 +51,11 @@ for time in range(time_max):
                         # 허브 하차
             else:
                 data.parcel[key][1] += 1
-        print(key, data.parcel[key])
 
     for key in data.parcel.keys():
         for i in range(4):
-            print(key, data.parcel_cost[key])
             if not data.parcel_cost[key][i]:
-                data.parcel_cost[key][i] = [env.hub_data[data.parcel[key][3][0][0]][4]][env.hub_data[data.parcel[key][3][1][0]][4]]
+                data.parcel_cost[key][i] = env.traffic[env.hub_data[data.parcel[key][3][0][0]][4]][env.hub_data[data.parcel[key][3][1][0]][4]]
     for key in env.hub_sky_codes:
         done = env.hub_classification(key)
         for k in done:
@@ -67,4 +63,3 @@ for time in range(time_max):
             # 허브 상차
 
 data.save_log('HnS_simulation_21104_01')
-'''
