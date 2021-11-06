@@ -2,17 +2,10 @@ import networkx as nx
 import csv
 from collections import deque
 
-'''
-허브 DATA : self.hub_data[코드][대기열, 최대용량, 이름, 처리시간]
-배송 DATA : [고유번호][출발지, 도착지, 경유지(list)]
-'''
-
 
 class LogisticNetwork:
     def __init__(self):
         self.network = nx.Graph()
-        self.data_road = list()
-        self.data_hub = list()
         self.hub_num = 0
         self.hub_data = {}
         self.hub_ground_codes = list()
@@ -22,15 +15,15 @@ class LogisticNetwork:
     def reset_network(self, road_file, hub_file):            # 시뮬레이션 초기화             ## 구현 완료
         f1 = open(road_file, 'r', encoding='UTF-8')
         f2 = open(hub_file, 'r', encoding='UTF-8')
-        self.data_road = csv.reader(f1)
-        self.data_hub = csv.reader(f2)
-        next(self.data_hub)
-        next(self.data_road)
-        for row in self.data_hub:
+        data_road = csv.reader(f1)
+        data_hub = csv.reader(f2)
+        next(data_hub)
+        next(data_road)
+        for row in data_hub:
             if not row[0]:
                 break
             self.hub_data[row[0]] = [deque(), int(row[1]), int(row[4]), row[2], int(row[5])]
-            # 이름:[대기열, 최대용량, 처리시간, 상위허브, 번호]
+            # 이름:[대기열, 처리용량, 처리시간, 상위허브, 번호]
             self.network.add_edge(row[0], row[3].split()[1], weight=15.0)
             if row[1] == '0':
                 self.hub_ground_codes.append(row[0])
@@ -43,7 +36,7 @@ class LogisticNetwork:
         name = list()
         dist = list()
         n = 1
-        for row in self.data_road:
+        for row in data_road:
             if n == 1:
                 for value in row:
                     if value:
@@ -58,31 +51,23 @@ class LogisticNetwork:
                     self.network.add_edge(name[i - 1], name[i], weight=float(dist[i]))
                 name = []
                 dist = []
-
             n *= -1
-
-    def update_weight(self):    # 교통상황 반영       -->  추후 예정(필수 X)
-        pass
-
-    def solve_path_cost(self, path, path_len):     # 경로 비용 계산   ## 구현 완료
-        cost = 0
-        for i in range(path_len-1):
-            cost += nx.shortest_path_length(self.network, source=path[i], target=path[i+1], weight='weight')
-        return cost
 
 # 허브에서의 이동 관련 함수들
 
-    def hub_load(self, hub, sample):
-        self.hub_data[hub][0].append([sample, 0])
+    def hub_load(self, hub, time, sample):
+        if len(self.hub_data[hub][0]) <= self.hub_data[1]:
+            self.hub_data[hub][0].append([sample, time+self.hub_data[hub][2]])
+        else:
+            self.hub_data[hub][0].append([sample, 0])
 
-    def hub_classification(self, hub):
+    def hub_classification(self, hub, time):
         done = list()
+        k = 0
         for i in range(self.hub_data[hub][1]):
-            if not self.hub_data[hub][0][i]:
-                return
-            elif self.hub_data[hub][0][i][1] == self.hub_data[hub][2]:
-                done.append(self.hub_data[hub][0].popleft()[0])
-                # 허브 탈출
-            else:
-                self.hub_data[hub][0][i][1] += 1
+            if self.hub_data[hub][0][0][1] == time:
+                done.append(self.hub_data[hub][0].popleft())
+            elif not self.hub_data[hub][0][k][1]:
+                self.hub_data[hub][0][k][1] = time + self.hub_data[hub][2]
+                k += 1
         return done

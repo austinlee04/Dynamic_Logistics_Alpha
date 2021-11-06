@@ -1,5 +1,4 @@
 import networkx as nx
-import matplotlib.pyplot as plt
 import Environment_V1
 import Data_manager_V1
 import random
