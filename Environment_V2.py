@@ -65,7 +65,6 @@ class LogisticNetwork:
         done = list()
         k = 0
         for i in range(self.hub_data[hub][1]):
-            print(self.hub_data[hub][0])
             if not self.hub_data[hub][0]:
                 break
             if self.hub_data[hub][0][0][1] == time:
