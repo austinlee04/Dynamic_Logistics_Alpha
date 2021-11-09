@@ -9,3 +9,8 @@
 다음에 할 일 :
 - env.traffic list out of range 에러 해결
 - sim 완성
+
+21.11.09
+할 일 :
+- V2 제작(sim, env, data)
+-
