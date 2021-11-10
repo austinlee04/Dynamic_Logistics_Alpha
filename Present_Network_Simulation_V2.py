@@ -52,11 +52,13 @@ for time in tqdm(range(1, time_max+1)):
         elif data.parcel[key][0] == 'R':
             # 도로 주행
             if data.parcel[key][1] == time:
-                for i in range(1, len(data.parcel[key][3])-1):
+                for i in range(1, len(data.parcel[key][3])):
                     if not data.parcel[key][3][i][1]:
                         data.parcel[key][3][i][1] = True
+                        # print(key, data.parcel[key][3])
                         if data.parcel[key][3][-1][1]:
                             data.parcel[key][0] = 'F'
+                            # print(key)
                             data.parcel_log[key][0][-1][1] = time
                         else:
                             data.parcel[key][0] = 'H'
@@ -65,9 +67,9 @@ for time in tqdm(range(1, time_max+1)):
                             env.traffic[data.parcel[key][2][0]][data.parcel[key][2][1]] -= 1
                             break
 
-        elif data.parcel[key][0] == 'F':
-            # 운송 완료
-            pass
+    for key in list(data.parcel.keys()):            # 데이터를 효율적으로 사용하기 위해 운송이 끝난 parcel의 데이터를 삭제하는 과정
+        if data.parcel[key][0] == 'F':
+            del data.parcel[key]
 
     for name in env.hub_sky_codes:
         # 허브에서 간선상차
@@ -100,9 +102,10 @@ for time in tqdm(range(1, time_max+1)):
                     data.parcel[key][0] = 'R'
                     break
 
+
 '''
 for key in data.parcel.keys():
     print('{}\n{}\n{}\n{}'.format(key, data.parcel[key], data.parcel_log[key][0], data.parcel_log[key][1]))
 '''
-data.save_log('HnS_simulation_211109_01')
+data.save_log('HnS_simulation_211110_04')
 

@@ -30,27 +30,21 @@ class DataManager:
         wr = csv.writer(f)
 
         wr.writerow(['택배번호',
-                     '출발지', '출발시간',
+                     '출발지', '출발시간', '거리', '통행량',
                      '경유지1', '하차시간', '상차시간', '거리', '통행량',
                      '경유지2', '하차시간', '상차시간', '거리', '통행량',
                      '경유지3', '하차시간', '상차시간', '거리', '통행량',
-                     '도착지', '도착시간', '거리', '통행량'])
+                     '도착지', '도착시간'])
 
         for key in self.parcel_log.keys():
             data = list()
             data.append(key)                                    # 택배번호
-            data.extend(self.parcel_log[key][0])                # 출발지, 출발시간
-            if len(self.parcel_log[key][2]) >= 1:
-                data.extend(self.parcel_log[key][2][0])         # 경유지1, 하차시간, 상차시간
-                data.extend(self.parcel_log[key][3][0][2:])     # 거리, 통행량
-            if len(self.parcel_log[key][2]) >= 2:
-                data.extend(self.parcel_log[key][2][1])         # 경유지2, 하차시간, 상차시간
-                data.extend(self.parcel_log[key][3][1][2:])     # 거리, 통행량
-            if len(self.parcel_log[key][2]) >= 3:
-                data.extend(self.parcel_log[key][2][2])         # 경유지3, 하차시간, 상차시간
-                data.extend(self.parcel_log[key][3][2][2:])     # 거리, 통행량
-            data.extend(self.parcel_log[key][1])                # 도착지, 도착시간
-            data.extend(self.parcel_log[key][3][3][2:])         # 거리, 통행량
+            data.append(self.parcel_log[key][0][0][0])          # 출발지, 출발시간
+            data.append(self.parcel_log[key][0][0][2])
+            for i in range(len(self.parcel_log[key][1])):
+                data.extend(self.parcel_log[key][1][i][2:])        # (도로 운송) 거리, 구간 통행량
+                data.extend(self.parcel_log[key][0][i+1])          # 경유지, 도착시간, 출발시간
+            data.pop()
             wr.writerow(data)
 
         f.close()
