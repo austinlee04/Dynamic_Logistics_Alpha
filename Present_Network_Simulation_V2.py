@@ -31,7 +31,7 @@ def path_finder(dep, arv):
 env.reset_network('data/data_road_V3.csv', 'data/data_hub_V3.csv')
 
 for time in tqdm(range(1, time_max+1)):
-    data.sample_maker(env.hub_ground_codes, random.randint(10, 40), time)
+    data.sample_maker(env.hub_ground_codes, random.randint(100, 400), time)
 
     for key in data.parcel.keys():
         # Ground(경로 설정 해야 함), Road(R_ : 도로 배치), Hub, Finished
