@@ -78,6 +78,7 @@ for time in tqdm(range(1, time_max+1)):
             continue
         for key in done:
             for i in range(2, len(data.parcel[key][3])):
+                print(name, key)
                 if not data.parcel[key][3][i][1]:
                     data.parcel[key][0] = 'R_'
                     data.parcel_log[key][0][i-1][2] = time
@@ -107,5 +108,4 @@ for time in tqdm(range(1, time_max+1)):
 for key in data.parcel.keys():
     print('{}\n{}\n{}\n{}'.format(key, data.parcel[key], data.parcel_log[key][0], data.parcel_log[key][1]))
 '''
-data.save_log('HnS_simulation_211110_04')
-
+data.save_log('HnS_simulation_211129_03')
