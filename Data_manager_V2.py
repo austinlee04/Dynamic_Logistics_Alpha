@@ -1,7 +1,6 @@
 import random
 import csv
-from collections import deque
-from Environment_V2 import LogisticNetwork
+from Environment_V3 import LogisticNetwork
 # try to use pandas
 
 env = LogisticNetwork()

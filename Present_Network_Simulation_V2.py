@@ -1,10 +1,10 @@
-import Environment_V2
+import Environment_V3
 import Data_manager_V2
 import networkx as nx
 import random
 from tqdm import tqdm
 
-env = Environment_V2.LogisticNetwork()
+env = Environment_V3.LogisticNetwork()
 data = Data_manager_V2.DataManager()
 
 time_max = int(input('max time : '))
