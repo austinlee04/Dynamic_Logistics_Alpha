@@ -3,6 +3,8 @@ import Data_manager_V2
 import networkx as nx
 import random
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import csv
 
 env = Environment_V3.LogisticNetwork()
 data = Data_manager_V2.DataManager()
@@ -10,6 +12,7 @@ data = Data_manager_V2.DataManager()
 time_max = int(input('max time : '))
 speed = 15
 
+out, total = [],[]
 
 def path_finder(dep, arv):
     waypoint = list()
@@ -74,11 +77,12 @@ for time in tqdm(range(1, time_max+1)):
     for name in env.hub_sky_codes:
         # 허브에서 간선상차
         done = env.hub_classification(name, time)
+        if name == '중부권 광역우편물류센터':
+            out.append(len(done))
         if not done:
             continue
         for key in done:
             for i in range(2, len(data.parcel[key][3])):
-                print(name, key)
                 if not data.parcel[key][3][i][1]:
                     data.parcel[key][0] = 'R_'
                     data.parcel_log[key][0][i-1][2] = time
@@ -103,9 +107,24 @@ for time in tqdm(range(1, time_max+1)):
                     data.parcel[key][0] = 'R'
                     break
 
+    states = [0 for i in range(len(env.hub_sky_codes))]
+    for key in env.hub_sky_codes:
+        if not env.hub_data[key][0]:
+            states[env.hub_data[key][-1] - 1] = 0
+        else:
+            states[env.hub_data[key][-1] - 1] = round(len(env.hub_data[key][0]) / env.hub_data[key][1] * 100)
+    total.append(len(env.hub_data['중부권 광역우편물류센터'][0]))
+    # print('{0:03d} {1:06d} {2}
+    # '.format(time, len(env.hub_data['중부권 광역우편물류센터'][0]), env.hub_data['중부권 광역우편물류센터'][0]))
+
+x = [i for i in range(1, time_max+1)]
+plt.plot(x, out)
+plt.plot(x, total)
+plt.show()
+
 
 '''
 for key in data.parcel.keys():
     print('{}\n{}\n{}\n{}'.format(key, data.parcel[key], data.parcel_log[key][0], data.parcel_log[key][1]))
 '''
-data.save_log('HnS_simulation_211129_03')
+data.save_log('HnS_simulation_211202_02')
