@@ -22,7 +22,7 @@ class LogisticNetwork:
         for row in data_hub:
             if not row[0]:
                 break
-            self.hub_data[row[0]] = [deque(), int(row[1]), int(row[4]), row[2], int(row[5])]
+            self.hub_data[row[0]] = [deque(), int(row[1])*10, int(row[4]), row[2], int(row[5])]
             # 이름:[대기열, 처리용량, 처리시간, 상위허브, 번호]
             self.network.add_edge(row[0], row[3].split()[1], weight=15.0)
             if row[1] == '0':
