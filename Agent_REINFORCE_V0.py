@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
 
+
 class REINFORCE(tf.keras.Model):
     def __init__(self, action_size):
         super(REINFORCE, self).__init__()
@@ -15,6 +16,7 @@ class REINFORCE(tf.keras.Model):
         x = self.fc2(x)
         policy = self.fc_out(x)
         return policy
+
 
 class Agent:
     def __init__(self, state_size, action_size):
@@ -30,7 +32,7 @@ class Agent:
         self.states, self.actions, self.rewards = [],[],[]
 
     def get_action(self, state):
-        policy = self.model(state)[0]
+        policy = self.model(state)[0]       # 인공신경망에 상태를 입력으로, 각 행동 할 확률 반환
         policy = np.array(policy)
         return np.random.choice(self.action_size, 1, p=policy)[0]
         # 신경망의 입력으로 state 를 주고 policy 를 return, 확률적으로 action 선택

@@ -12,6 +12,29 @@ class Simulation(LogisticNetwork, DataManager):
         self.speed = 15
         self.env = LogisticNetwork()
         self.data = DataManager()
+        self.weight = list()
+        self.routes = list()
+
+    def get_state(self, time):
+        self.routes = self.data.sample_maker(self.env.hub_ground_codes, random.randint(100, 400), time)
+        state = []
+        for sample in self.routes:
+            s = list()
+            s.append(round(len(self.env.hub_data[self.routes[0]][0]) / self.env.hub_data[self.routes[0]][1] * 100))
+            s.append(round(len(self.env.hub_data['중부권 광역우편물류센터'][0]) / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
+            s.append(round(len(self.env.hub_data[self.routes[1]][0]) / self.env.hub_data[self.routes[1]][1] * 100))
+            sum = 0
+            for name in self.env.hub_sky_codes:
+                if name == '중부권 광역우편물류센터':
+                    continue
+                sum += round(len(self.env.hub_data[name][0]) / 2)
+            s.append(round(sum / len(self.env.hub_data['중부권 광역우편물류센터'][1]) * 100))
+            state.append(s)
+        return state
+
+    def path_finder_weights(self, data):
+        # 경로 따른 가중치 설정
+        pass
 
     def path_finder(self, dep, arv):
         waypoint = list()
@@ -22,15 +45,7 @@ class Simulation(LogisticNetwork, DataManager):
         waypoint.append(arv)
         return waypoint
 
-    def get_state(self):
-        states = [0 for i in range(len(self.env.hub_data.keys()))]
-        for key in self.env.hub_data.keys():
-            states[self.env.hub_data[key][-1]-1] = round(len(self.env.hub_data[key][0]) / self.env.hub_data[key][1] * 100)
-        return states
-
     def simulate(self, time):
-        self.data.sample_maker(self.env.hub_ground_codes, random.randint(100, 400), time)
-
         for key in self.data.parcel.keys():
             # Ground(경로 설정 해야 함), Road(R_ : 도로 배치), Hub, Finished
             if self.data.parcel[key][0] == 'G':
@@ -101,6 +116,13 @@ class Simulation(LogisticNetwork, DataManager):
                         self.data.parcel_log[key][1][i - 1][3] = self.env.traffic[self.data.parcel[key][2][0]][self.data.parcel[key][2][1]]
                         self.data.parcel[key][0] = 'R'
                         break
+
+    def arrival(self):
+        pass
+
+    def get_result(self):
+        states = [0, 0, 0, 0]
+        return states
 
     def save_simulation(self):
         self.data.save_log('HnS_simulation_211129_03')
