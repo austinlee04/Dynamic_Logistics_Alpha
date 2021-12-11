@@ -14,6 +14,7 @@ class Simulation(LogisticNetwork, DataManager):
         self.data = DataManager()
         self.weight = list()
         self.routes = list()
+        self.fin = list()
 
     def get_state(self, time):
         self.routes = self.data.sample_maker(self.env.hub_ground_codes, random.randint(100, 400), time)
@@ -23,12 +24,12 @@ class Simulation(LogisticNetwork, DataManager):
             s.append(round(len(self.env.hub_data[self.routes[0]][0]) / self.env.hub_data[self.routes[0]][1] * 100))
             s.append(round(len(self.env.hub_data['중부권 광역우편물류센터'][0]) / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
             s.append(round(len(self.env.hub_data[self.routes[1]][0]) / self.env.hub_data[self.routes[1]][1] * 100))
-            sum = 0
+            tot = 0
             for name in self.env.hub_sky_codes:
                 if name == '중부권 광역우편물류센터':
                     continue
-                sum += round(len(self.env.hub_data[name][0]) / 2)
-            s.append(round(sum / len(self.env.hub_data['중부권 광역우편물류센터'][1]) * 100))
+                tot += round(len(self.env.hub_data[name][0]) / 2)
+            s.append(round(tot / len(self.env.hub_data['중부권 광역우편물류센터'][1]) * 100))
             state.append(s)
         return state
 
@@ -71,7 +72,9 @@ class Simulation(LogisticNetwork, DataManager):
                             self.data.parcel[key][3][i][1] = True
                             # print(key, data.parcel[key][3])
                             if self.data.parcel[key][3][-1][1]:
+                                # 운송 완료
                                 self.data.parcel[key][0] = 'F'
+                                self.fin.append(key)
                                 # print(key)
                                 self.data.parcel_log[key][0][-1][1] = time
                             else:
@@ -117,12 +120,54 @@ class Simulation(LogisticNetwork, DataManager):
                         self.data.parcel[key][0] = 'R'
                         break
 
-    def arrival(self):
-        pass
-
     def get_result(self):
-        states = [0, 0, 0, 0]
-        return states
+        step = []
+        for key in self.fin:
+            # get next state
+            state = list()
+            dep = self.data.parcel_log[key][0][0]
+            dep_top = self.env.hub_data[dep][2]
+            arv = self.data.parcel_log[key][-1][0]
+            arv_top = self.data.parcel_log[arv][2]
+            state.append(round(len(self.env.hub_data[dep_top][0]) / self.env.hub_data[dep_top][1] * 100))
+            state.append(round(len(self.env.hub_data['중부권 광역우편물류센터'][0]) / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
+            state.append(round(len(self.env.hub_data[arv_top][0]) / self.env.hub_data[arv_top][1] * 100))
+            tot = 0
+            for name in self.env.hub_sky_codes:
+                if name == '중부권 광역우편물류센터':
+                    continue
+                tot += round(len(self.env.hub_data[name][0]) / 2)
+            state.append(round(tot / len(self.env.hub_data['중부권 광역우편물류센터'][1]) * 100))
+
+            # get action
+            action = 0
+            num = len(self.data.parcel_log[key][0])
+            if num == 5:
+                action = 8
+            elif num == 4:
+                if self.data.parcel_log[key][0][1][0] == '중부권 광역우편물류센터':
+                    action = 7
+                elif self.data.parcel_log[key][0][2][0] == '중부권 광역우편물류센터':
+                    action = 5
+                else:
+                    action = 6
+            elif num == 3:
+                if self.data.parcel_log[key][0][1][0] == dep_top:
+                    action = 2
+                elif self.data.parcel_log[key][0][1][0] == arv_top:
+                    action = 4
+                else:
+                    action = 3
+            else:
+                action = 1
+
+            # get reward
+            reward = 0
+
+
+            step.append((state, action, reward))
+
+        return step
 
     def save_simulation(self):
         self.data.save_log('HnS_simulation_211129_03')
