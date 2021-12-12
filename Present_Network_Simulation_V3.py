@@ -8,7 +8,6 @@ class Simulation(LogisticNetwork, DataManager):
     def __init__(self):
         super(LogisticNetwork, self).__init__()
         super(DataManager, self).__init__()
-        self.time_max = int(input('max time : '))
         self.speed = 15
         self.env = LogisticNetwork()
         self.data = DataManager()
@@ -21,9 +20,9 @@ class Simulation(LogisticNetwork, DataManager):
         state = []
         for sample in self.routes:
             s = list()
-            s.append(round(len(self.env.hub_data[self.routes[0]][0]) / self.env.hub_data[self.routes[0]][1] * 100))
+            s.append(round(len(self.env.hub_data[sample[0][3]][0]) / self.env.hub_data[sample[0][3]][1] * 100))
             s.append(round(len(self.env.hub_data['중부권 광역우편물류센터'][0]) / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
-            s.append(round(len(self.env.hub_data[self.routes[1]][0]) / self.env.hub_data[self.routes[1]][1] * 100))
+            s.append(round(len(self.env.hub_data[sample[1][3]][0]) / self.env.hub_data[sample[1][3]][1] * 100))
             tot = 0
             for name in self.env.hub_sky_codes:
                 if name == '중부권 광역우편물류센터':
@@ -140,7 +139,6 @@ class Simulation(LogisticNetwork, DataManager):
             state.append(round(tot / len(self.env.hub_data['중부권 광역우편물류센터'][1]) * 100))
 
             # get action
-            action = 0
             num = len(self.data.parcel_log[key][0])
             if num == 5:
                 action = 8
@@ -162,12 +160,16 @@ class Simulation(LogisticNetwork, DataManager):
                 action = 1
 
             # get reward
-            reward = 0
-
+            dist, cost = 0, 0
+            for i in range(num-1):
+                dist += self.data.parcel_log[key][1][i][2]
+                cost += self.data.parcel_log[key][1][i][2] / self.data.parcel_log[key][1][i][3]
+            t = self.data.parcel_log[key][0][-1][1] - self.data.parcel_log[key][0][0][2]
+            reward = (dist ** 2) / (cost * t)
 
             step.append((state, action, reward))
 
         return step
 
-    def save_simulation(self):
-        self.data.save_log('HnS_simulation_211129_03')
+    def save_simulation(self, name):
+        self.data.save_log('HnS_simulation_'+name)

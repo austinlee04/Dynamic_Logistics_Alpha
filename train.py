@@ -1,6 +1,7 @@
 from Present_Network_Simulation_V3 import Simulation
 from Agent_REINFORCE_V0 import Agent
 import numpy as np
+from tqdm import tqdm
 
 if __name__ == "__main__":
     state_size = 4
@@ -20,32 +21,35 @@ if __name__ == "__main__":
     episode_num = int(input('how many episodes? : '))
     MTE = 10000     # 에피소드 종료시키기 위해 이동시켜야 하는 소포 양
 
-    for e in range(episode_num):
-        done = False
+    for e in tqdm(range(episode_num)):
+        done = 0
         score = 0
         time = 1
 
         sim.env.reset_network('data/data_road_V3.csv', 'data/data_hub_V3.csv')
-        state = sim.get_state()
+        state = sim.get_state(time+1)
         # state = np.reshape(state, [1, state_size])
 
-        while not done:
+        while done <= MTE:
             for sample in state:
                 s = np.reshape(sample, [1, state_size])
                 action = agent.get_action(state)
 
-            next_state, reward, done = sim.get_state(time),
-            next_state = np.reshape(next_state, [1, state_size])
+            for result in sim.get_result():
+                done += 1
+                next_state, action_made, reward = result[0], result[1], result[2]
+                next_state = np.reshape(next_state, [1, state_size])
+                agent.append_sample(state, action_made, reward)
+                score += reward
 
-            agent.append_sample(state, action, reward)
-            score += reward
+            time += 1
+            state = sim.get_state(time)
 
-            state = next_state
-
-            if done:
-                entropy = agent.train_model()
-                print("episode: {:3d} | score: {:3d} | entropy: {:.3f}".format(time, score, entropy))
-                scores.append(score)
-                episodes.append(e)
+        entropy = agent.train_model()
+        print("episode: {:3d} | score: {:3d} | entropy: {:.3f}".format(time, score, entropy))
+        scores.append(score)
+        episodes.append(e)
 
         agent.model.save_weights('save_model/model', save_format='tf')
+
+    sim.save_simulation('211213_01')

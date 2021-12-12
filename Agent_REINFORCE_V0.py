@@ -29,7 +29,7 @@ class Agent:
         self.model = REINFORCE(self.action_size)
         # 인공신경망 지정
         self.optimizer = Adam(lr=self.learning_rate)
-        self.states, self.actions, self.rewards = [],[],[]
+        self.states, self.actions, self.rewards = [], [], []
 
     def get_action(self, state):
         policy = self.model(state)[0]       # 인공신경망에 상태를 입력으로, 각 행동 할 확률 반환
@@ -75,5 +75,5 @@ class Agent:
         # loss 통해 각 가중치 업데이트
         grads = tape.gradient(loss, model_params)
         self.optimizer.apply_gradients(zip(grads, model_params))
-        self.states, self.actions, self.rewards = [],[],[]
+        self.states, self.actions, self.rewards = [], [], []
         return np.mean(entropy)
