@@ -4,50 +4,54 @@ import networkx as nx
 import random
 
 
-class Simulation(LogisticNetwork, DataManager):
+# class Simulation(LogisticNetwork, DataManager):
+class Simulation:
     def __init__(self):
-        super(LogisticNetwork, self).__init__()
-        super(DataManager, self).__init__()
+        # super(LogisticNetwork, self).__init__()
+        # super(DataManager, self).__init__()
         self.speed = 15
         self.env = LogisticNetwork()
         self.data = DataManager()
-        self.weight = list()
+        self.weight = [[0 for _ in range(247)] for _ in range(247)]
         self.routes = list()
         self.fin = list()
+        # __ 상속 없이 가능???
 
     def get_state(self, time):
         self.routes = self.data.sample_maker(self.env.hub_ground_codes, random.randint(100, 400), time)
         state = []
         for sample in self.routes:
             s = list()
-            s.append(round(len(self.env.hub_data[sample[0][3]][0]) / self.env.hub_data[sample[0][3]][1] * 100))
+            s.append(round(len(self.env.hub_data[self.env.hub_data[sample[0]][3]][0]) / self.env.hub_data[self.env.hub_data[sample[0]][3]][1] * 100))
             s.append(round(len(self.env.hub_data['중부권 광역우편물류센터'][0]) / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
-            s.append(round(len(self.env.hub_data[sample[1][3]][0]) / self.env.hub_data[sample[1][3]][1] * 100))
+            s.append(round(len(self.env.hub_data[self.env.hub_data[sample[1]][3]][0]) / self.env.hub_data[self.env.hub_data[sample[1]][3]][1] * 100))
             tot = 0
             for name in self.env.hub_sky_codes:
                 if name == '중부권 광역우편물류센터':
                     continue
                 tot += round(len(self.env.hub_data[name][0]) / 2)
-            s.append(round(tot / len(self.env.hub_data['중부권 광역우편물류센터'][1]) * 100))
+            s.append(round(tot / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
+            s.append(sample)
             state.append(s)
         return state
 
-    def path_finder_weights(self, data):
-        # 경로 따른 가중치 설정
-        pass
-
     def path_finder(self, dep, arv):
         waypoint = list()
+        action = self.weight[self.env.hub_data[dep][4]-25][self.env.hub_data[arv][4]-25]
         waypoint.append(dep)
-        waypoint.append(self.env.hub_data[dep][3])
-        waypoint.append('중부권 광역우편물류센터')
-        waypoint.append(self.env.hub_data[arv][3])
+        if action in (2, 5, 6, 8):
+            waypoint.append(self.env.hub_data[dep][3])
+        if action in (3, 5, 7, 8):
+            waypoint.append('중부권 광역우편물류센터')
+        if action in (4, 6, 7, 8):
+            waypoint.append(self.env.hub_data[arv][3])
         waypoint.append(arv)
         return waypoint
 
     def simulate(self, time):
         for key in self.data.parcel.keys():
             # Ground(경로 설정 해야 함), Road(R_ : 도로 배치), Hub, Finished
+            # print(key, self.data.parcel[key])
             if self.data.parcel[key][0] == 'G':
                 # 운송정보 초기 설정
                 path = self.path_finder(self.data.parcel[key][-1][0], self.data.parcel[key][-1][1])
@@ -58,7 +62,7 @@ class Simulation(LogisticNetwork, DataManager):
                     self.data.parcel_log[key][0].append([path[i], 0, 0])
                 for i in range(len(path) - 1):
                     self.data.parcel_log[key][1].append([path[i], path[i + 1], round(
-                        nx.shortest_path_length(self.env.network, path[i], path[i + 1], weight='weight')), 0])
+                        nx.shortest_path_length(self.env.network, path[i], path[i + 1], weight='weight')), 1])
                 del self.data.parcel[key][-1]
                 self.data.parcel[key][3][0][1] = True
                 self.data.parcel[key][0] = 'R_'
@@ -83,7 +87,8 @@ class Simulation(LogisticNetwork, DataManager):
                                 self.env.traffic[self.data.parcel[key][2][0]][self.data.parcel[key][2][1]] -= 1
                                 break
 
-        for key in list(self.data.parcel.keys()):  # 데이터를 효율적으로 사용하기 위해 운송이 끝난 parcel 의 데이터를 삭제하는 과정
+        for key in list(self.data.parcel.keys()):
+            # 데이터를 효율적으로 사용하기 위해 운송이 끝난 parcel 의 데이터를 삭제하는 과정
             if self.data.parcel[key][0] == 'F':
                 del self.data.parcel[key]
 
@@ -94,7 +99,6 @@ class Simulation(LogisticNetwork, DataManager):
                 continue
             for key in done:
                 for i in range(2, len(self.data.parcel[key][3])):
-                    print(name, key)
                     if not self.data.parcel[key][3][i][1]:
                         self.data.parcel[key][0] = 'R_'
                         self.data.parcel_log[key][0][i - 1][2] = time
@@ -107,27 +111,32 @@ class Simulation(LogisticNetwork, DataManager):
                         self.data.parcel_log[key][0][i - 1][2] = time
                         self.data.parcel[key][2][0] = self.env.hub_data[self.data.parcel[key][3][i - 1][0]][4]
                         self.data.parcel[key][2][1] = self.env.hub_data[self.data.parcel[key][3][i][0]][4]
-                        self.env.traffic[self.data.parcel[key][2][0]][self.data.parcel[key][2][1]] += 1
+                        self.data.parcel_log[key][1][i-1][3] = self.env.traffic[self.data.parcel[key][2][0]][self.data.parcel[key][2][1]]
+                        self.data.parcel[key][1] = time + round(self.data.parcel_log[key][1][i - 1][2] / self.speed)
+                        self.data.parcel[key][0] = 'R'
                         break
-
+    '''
         for key in self.data.parcel.keys():
             if self.data.parcel[key][0] == 'R_':
                 for i in range(1, len(self.data.parcel[key][3])):
                     if not self.data.parcel[key][3][i][1]:
-                        self.data.parcel[key][1] = time + round(self.data.parcel_log[key][1][i - 1][2] / 15)
-                        self.data.parcel_log[key][1][i - 1][3] = self.env.traffic[self.data.parcel[key][2][0]][self.data.parcel[key][2][1]]
+                        self.data.parcel[key][1] = time + round(self.data.parcel_log[key][1][i - 1][2] / self.speed)
                         self.data.parcel[key][0] = 'R'
                         break
+    '''
 
     def get_result(self):
+        if not self.fin:
+            return False
         step = []
-        for key in self.fin:
+        for i in range(len(self.fin)):
+            key = self.fin.pop()
             # get next state
             state = list()
-            dep = self.data.parcel_log[key][0][0]
-            dep_top = self.env.hub_data[dep][2]
-            arv = self.data.parcel_log[key][-1][0]
-            arv_top = self.data.parcel_log[arv][2]
+            dep = self.data.parcel_log[key][0][0][0]
+            dep_top = self.env.hub_data[dep][3]
+            arv = self.data.parcel_log[key][0][-1][0]
+            arv_top = self.env.hub_data[arv][3]
             state.append(round(len(self.env.hub_data[dep_top][0]) / self.env.hub_data[dep_top][1] * 100))
             state.append(round(len(self.env.hub_data['중부권 광역우편물류센터'][0]) / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
             state.append(round(len(self.env.hub_data[arv_top][0]) / self.env.hub_data[arv_top][1] * 100))
@@ -136,7 +145,7 @@ class Simulation(LogisticNetwork, DataManager):
                 if name == '중부권 광역우편물류센터':
                     continue
                 tot += round(len(self.env.hub_data[name][0]) / 2)
-            state.append(round(tot / len(self.env.hub_data['중부권 광역우편물류센터'][1]) * 100))
+            state.append(round(tot / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
 
             # get action
             num = len(self.data.parcel_log[key][0])
@@ -161,11 +170,11 @@ class Simulation(LogisticNetwork, DataManager):
 
             # get reward
             dist, cost = 0, 0
-            for i in range(num-1):
-                dist += self.data.parcel_log[key][1][i][2]
-                cost += self.data.parcel_log[key][1][i][2] / self.data.parcel_log[key][1][i][3]
+            for j in range(num-1):
+                dist += self.data.parcel_log[key][1][j][2]
+                cost += self.data.parcel_log[key][1][j][2] / (self.data.parcel_log[key][1][j][3] + 1)
             t = self.data.parcel_log[key][0][-1][1] - self.data.parcel_log[key][0][0][2]
-            reward = (dist ** 2) / (cost * t)
+            reward = round((dist ** 2) / (cost * t + 1))
 
             step.append((state, action, reward))
 

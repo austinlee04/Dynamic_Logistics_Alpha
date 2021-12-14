@@ -21,8 +21,8 @@ class DataManager:
             if (dep, arv) not in key:
                 key.append((dep, arv))
             self.parcel[parcel_code] = ['G', 0, [0, 0], [], [dep, arv]]
+            # [위치, 도로운송완료시간, [경로 출발지 번호, 경로 도착지 번호], [[경유지, 도착여부]], [출발지, 도착지]]
             # [3].append left [경유지, 통과여부]
-            # [위치, 도로운송완료시간, [경로 출발지 번호, 경로 도착지 번호], [경유지[위치, 도착여부]], [출발지, 도착지]]
             self.parcel_log[parcel_code] = [[], []]
             # [허브 통과 정보[경유지, 도착시간, 출발시간], 도로 운송 정보[출발지, 도착지, 거리, 구간 통행량]] --> append 사용
         return key

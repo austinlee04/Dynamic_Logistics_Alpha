@@ -2,6 +2,7 @@ from Present_Network_Simulation_V3 import Simulation
 from Agent_REINFORCE_V0 import Agent
 import numpy as np
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     state_size = 4
@@ -19,37 +20,50 @@ if __name__ == "__main__":
 
     scores, episodes = [], []
     episode_num = int(input('how many episodes? : '))
-    MTE = 10000     # 에피소드 종료시키기 위해 이동시켜야 하는 소포 양
+    MTE = 750     # 에피소드 종료시키기 위해 이동시켜야 하는 소포 양
+
+    time_taken = list()
 
     for e in tqdm(range(episode_num)):
+    # for e in range(episode_num):
         done = 0
         score = 0
         time = 1
 
         sim.env.reset_network('data/data_road_V3.csv', 'data/data_hub_V3.csv')
-        state = sim.get_state(time+1)
-        # state = np.reshape(state, [1, state_size])
 
         while done <= MTE:
-            for sample in state:
-                s = np.reshape(sample, [1, state_size])
-                action = agent.get_action(state)
-
-            for result in sim.get_result():
-                done += 1
-                next_state, action_made, reward = result[0], result[1], result[2]
-                next_state = np.reshape(next_state, [1, state_size])
-                agent.append_sample(state, action_made, reward)
-                score += reward
-
-            time += 1
             state = sim.get_state(time)
+            for sample in state:
+                route = sample.pop()
+                s = np.reshape(sample, [1, state_size])
+                action = agent.get_action(s)
+                sim.weight[sim.env.hub_data[route[0]][4]-25][sim.env.hub_data[route[1]][4]-25] = action
+                # 경로 따른 가중치(행동 선택) 설정
+
+            sim.simulate(time)
+
+            val = sim.get_result()
+            if val:
+                for result in val:
+                    done += 1
+                    action_made, reward = result[1], result[2]
+                    next_state = np.reshape(result[0], [1, state_size])
+                    agent.append_sample(state, action_made, reward)
+                    score += reward
+
+            # print('episode: {:3d} | time: {:4d} | done: {:5d}'.format(e, time, done))
+            time += 1
 
         entropy = agent.train_model()
-        print("episode: {:3d} | score: {:3d} | entropy: {:.3f}".format(time, score, entropy))
+        # print("episode: {:3d} | score: {:3d} | entropy: {:.3f}".format(time, score, entropy))
         scores.append(score)
         episodes.append(e)
-
         agent.model.save_weights('save_model/model', save_format='tf')
+        time_taken.append(time)
+        sim.save_simulation('211214_02')
+        # sim.save_simulation('211214_{:2d}'.format(e))
 
-    sim.save_simulation('211213_01')
+    plt.plot(episodes, time_taken, 'yellow', label='time taken')
+    plt.plot(episodes, scores, 'red', label='cost')
+    plt.show()
