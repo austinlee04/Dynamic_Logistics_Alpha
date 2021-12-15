@@ -24,8 +24,8 @@ if __name__ == "__main__":
 
     time_taken = list()
 
-    for e in tqdm(range(episode_num)):
-    # for e in range(episode_num):
+    # for e in tqdm(range(episode_num)):
+    for e in range(episode_num):
         done = 0
         score = 0
         time = 1
@@ -52,7 +52,7 @@ if __name__ == "__main__":
                     agent.append_sample(state, action_made, reward)
                     score += reward
 
-            # print('episode: {:3d} | time: {:4d} | done: {:5d}'.format(e, time, done))
+            print('episode: {:3d} | time: {:4d} | done: {:5d}'.format(e, time, done))
             time += 1
 
         entropy = agent.train_model()
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         episodes.append(e)
         agent.model.save_weights('save_model/model', save_format='tf')
         time_taken.append(time)
-        sim.save_simulation('211214_02')
+        sim.save_simulation('211214_01')
         # sim.save_simulation('211214_{:2d}'.format(e))
 
     plt.plot(episodes, time_taken, 'yellow', label='time taken')

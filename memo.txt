@@ -48,3 +48,7 @@
 현재는 임시조치를 취했지만, 추후 고쳐야 함.
 - 그 외에도 division by zero 에러가 sim_V3의 get_result 에서 비용 구하는 과정에서 자주 발생.
 임시조치에 분모에 +1 하도록 함.
+
+21.12.14
+다음에 할 일 :
+- catch those fucking errors!!!

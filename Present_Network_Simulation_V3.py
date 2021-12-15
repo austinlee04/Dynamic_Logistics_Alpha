@@ -9,7 +9,7 @@ class Simulation:
     def __init__(self):
         # super(LogisticNetwork, self).__init__()
         # super(DataManager, self).__init__()
-        self.speed = 15
+        self.speed = 20
         self.env = LogisticNetwork()
         self.data = DataManager()
         self.weight = [[0 for _ in range(247)] for _ in range(247)]
@@ -49,7 +49,7 @@ class Simulation:
         return waypoint
 
     def simulate(self, time):
-        for key in self.data.parcel.keys():
+        for key in list(self.data.parcel.keys()):
             # Ground(경로 설정 해야 함), Road(R_ : 도로 배치), Hub, Finished
             # print(key, self.data.parcel[key])
             if self.data.parcel[key][0] == 'G':
@@ -61,7 +61,7 @@ class Simulation:
                     self.data.parcel[key][3].append([path[i], False])
                     self.data.parcel_log[key][0].append([path[i], 0, 0])
                 for i in range(len(path) - 1):
-                    self.data.parcel_log[key][1].append([path[i], path[i + 1], round(
+                    self.data.parcel_log[key][1].append([path[i], path[i+1], round(
                         nx.shortest_path_length(self.env.network, path[i], path[i + 1], weight='weight')), 1])
                 del self.data.parcel[key][-1]
                 self.data.parcel[key][3][0][1] = True
@@ -73,24 +73,20 @@ class Simulation:
                     for i in range(1, len(self.data.parcel[key][3])):
                         if not self.data.parcel[key][3][i][1]:
                             self.data.parcel[key][3][i][1] = True
-                            # print(key, data.parcel[key][3])
                             if self.data.parcel[key][3][-1][1]:
                                 # 운송 완료
                                 self.data.parcel[key][0] = 'F'
                                 self.fin.append(key)
                                 # print(key)
                                 self.data.parcel_log[key][0][-1][1] = time
+                                del self.data.parcel[key]
+                                # 데이터를 효율적으로 사용하기 위해 운송이 끝난 parcel 의 데이터를 삭제하는 과정
                             else:
                                 self.data.parcel[key][0] = 'H'
                                 self.data.parcel_log[key][0][i][1] = time
                                 self.env.hub_load(self.data.parcel[key][3][i][0], time, key)
                                 self.env.traffic[self.data.parcel[key][2][0]][self.data.parcel[key][2][1]] -= 1
                                 break
-
-        for key in list(self.data.parcel.keys()):
-            # 데이터를 효율적으로 사용하기 위해 운송이 끝난 parcel 의 데이터를 삭제하는 과정
-            if self.data.parcel[key][0] == 'F':
-                del self.data.parcel[key]
 
         for name in self.env.hub_sky_codes:
             # 허브에서 간선상차
@@ -101,7 +97,7 @@ class Simulation:
                 for i in range(2, len(self.data.parcel[key][3])):
                     if not self.data.parcel[key][3][i][1]:
                         self.data.parcel[key][0] = 'R_'
-                        self.data.parcel_log[key][0][i - 1][2] = time
+                        self.data.parcel_log[key][0][i-1][2] = time
                         break
 
         for key in self.data.parcel.keys():
@@ -111,19 +107,17 @@ class Simulation:
                         self.data.parcel_log[key][0][i - 1][2] = time
                         self.data.parcel[key][2][0] = self.env.hub_data[self.data.parcel[key][3][i - 1][0]][4]
                         self.data.parcel[key][2][1] = self.env.hub_data[self.data.parcel[key][3][i][0]][4]
-                        self.data.parcel_log[key][1][i-1][3] = self.env.traffic[self.data.parcel[key][2][0]][self.data.parcel[key][2][1]]
+                        self.env.traffic[self.data.parcel[key][2][0]][self.data.parcel[key][2][1]] += 1
                         self.data.parcel[key][1] = time + round(self.data.parcel_log[key][1][i - 1][2] / self.speed)
-                        self.data.parcel[key][0] = 'R'
                         break
-    '''
+
         for key in self.data.parcel.keys():
             if self.data.parcel[key][0] == 'R_':
                 for i in range(1, len(self.data.parcel[key][3])):
                     if not self.data.parcel[key][3][i][1]:
-                        self.data.parcel[key][1] = time + round(self.data.parcel_log[key][1][i - 1][2] / self.speed)
+                        self.data.parcel_log[key][1][i-1][3] = self.env.traffic[self.data.parcel[key][2][0]][self.data.parcel[key][2][1]]
                         self.data.parcel[key][0] = 'R'
                         break
-    '''
 
     def get_result(self):
         if not self.fin:
@@ -172,9 +166,9 @@ class Simulation:
             dist, cost = 0, 0
             for j in range(num-1):
                 dist += self.data.parcel_log[key][1][j][2]
-                cost += self.data.parcel_log[key][1][j][2] / (self.data.parcel_log[key][1][j][3] + 1)
+                cost += self.data.parcel_log[key][1][j][2] / (self.data.parcel_log[key][1][j][3])
             t = self.data.parcel_log[key][0][-1][1] - self.data.parcel_log[key][0][0][2]
-            reward = round((dist ** 2) / (cost * t + 1))
+            reward = round((dist ** 2) / (cost * t))
 
             step.append((state, action, reward))
 
