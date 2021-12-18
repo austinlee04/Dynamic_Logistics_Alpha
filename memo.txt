@@ -52,3 +52,8 @@
 21.12.14
 다음에 할 일 :
 - catch those fucking errors!!!
+
+21.12.28
+Note :
+- division by zero 원인 찾음 --> 출발지와 도착지가 같은 샘플이 생김.
+(random.sample 으로 중복 방지한 줄 알았지만 다른 오류가 발생한 듯 함)
