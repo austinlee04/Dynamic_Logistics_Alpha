@@ -38,6 +38,7 @@ class DataManager:
                      '경유지3', '하차시간', '상차시간', '거리', '통행량',
                      '도착지', '도착시간'])
 
+        '''
         for key in self.parcel_log.keys():
             data = list()
             data.append(key)                                    # 택배번호
@@ -48,6 +49,16 @@ class DataManager:
                 data.extend(self.parcel_log[key][0][i+1])          # 경유지, 도착시간, 출발시간
             data.pop()
             wr.writerow(data)
+        '''
+        for key in self.parcel_log.keys():
+            row = list()
+            row.append(key)
+            for data in self.parcel_log[key][0]:
+                row.extend(data)
+            row.append('')
+            for data in self.parcel_log[key][1]:
+                row.extend(data)
+            wr.writerow(row)
 
         f.close()
 

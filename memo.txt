@@ -55,5 +55,5 @@
 
 21.12.28
 Note :
-- division by zero 원인 찾음 --> 출발지와 도착지가 같은 샘플이 생김.
-(random.sample 으로 중복 방지한 줄 알았지만 다른 오류가 발생한 듯 함)
+- division by zero 에러가 에피소드 1개당 1~2개 꼴로 발생
+- parcel log 가 제대로 기록되지 않음(도착시간 기록 오류)
