@@ -69,7 +69,7 @@ class LogisticNetwork:
                 break
             if self.hub_data[hub][0][0][1] == time:
                 done.append(self.hub_data[hub][0].popleft()[0])
-            elif self.hub_data[hub][0][k][1] == 0:
+            elif not self.hub_data[hub][0][k][1]:
                 self.hub_data[hub][0][k][1] = time + self.hub_data[hub][2]
                 k += 1
         return done

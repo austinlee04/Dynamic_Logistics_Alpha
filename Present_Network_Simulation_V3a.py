@@ -38,9 +38,9 @@ class Simulation:
     def path_finder(self, dep, arv):
         waypoint = list()
         waypoint.append(dep)
-        waypoint.append(self.env.hub_data[dep][3])
+        # waypoint.append(self.env.hub_data[dep][3])
         waypoint.append('중부권 광역우편물류센터')
-        waypoint.append(self.env.hub_data[arv][3])
+        # waypoint.append(self.env.hub_data[arv][3])
         waypoint.append(arv)
         return waypoint
 

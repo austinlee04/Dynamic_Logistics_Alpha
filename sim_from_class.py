@@ -28,4 +28,4 @@ if __name__ == "__main__":
         sim.simulate(time)
 
     # print(time)
-    sim.save_simulation('211218_02_sim(type5)')
+    sim.save_simulation('211220_01_sim(type3)')

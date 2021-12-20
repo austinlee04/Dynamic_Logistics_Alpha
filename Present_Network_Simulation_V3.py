@@ -106,11 +106,11 @@ class Simulation:
             if self.data.parcel[key][0] == 'R_':
                 for i in range(1, len(self.data.parcel[key][3])):
                     if not self.data.parcel[key][3][i][1]:
-                        self.data.parcel_log[key][0][i - 1][2] = time
+                        self.data.parcel_log[key][0][i-1][2] = time
                         self.data.parcel[key][2][0] = self.env.hub_data[self.data.parcel[key][3][i - 1][0]][4]
                         self.data.parcel[key][2][1] = self.env.hub_data[self.data.parcel[key][3][i][0]][4]
                         self.env.traffic[self.data.parcel[key][2][0]][self.data.parcel[key][2][1]] += 1
-                        self.data.parcel[key][1] = time + round(self.data.parcel_log[key][1][i - 1][2] / self.speed)
+                        self.data.parcel[key][1] = time + round(self.data.parcel_log[key][1][i-1][2] / self.speed)
                         break
 
         for key in self.data.parcel.keys():

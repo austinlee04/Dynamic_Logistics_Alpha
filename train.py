@@ -62,7 +62,7 @@ if __name__ == "__main__":
         episodes.append(e)
         agent.model.save_weights('save_model/model', save_format='tf')
         time_taken.append(time)
-        sim.save_simulation('211219_03_train')
+        sim.save_simulation('211220_05_train')
         print(e, sim.error)
         # sim.save_simulation('211214_{:2d}'.format(e))
 

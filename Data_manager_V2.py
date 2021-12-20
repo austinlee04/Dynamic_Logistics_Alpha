@@ -51,13 +51,17 @@ class DataManager:
             wr.writerow(data)
         '''
         for key in self.parcel_log.keys():
+            if self.parcel_log[key][0][-1][1]:
+                continue
             row = list()
             row.append(key)
             for data in self.parcel_log[key][0]:
                 row.extend(data)
             row.append('')
+            '''
             for data in self.parcel_log[key][1]:
                 row.extend(data)
+            '''
             wr.writerow(row)
 
         f.close()
