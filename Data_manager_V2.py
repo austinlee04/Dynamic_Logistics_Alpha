@@ -50,19 +50,16 @@ class DataManager:
             data.pop()
             wr.writerow(data)
         '''
+
         for key in self.parcel_log.keys():
-            if self.parcel_log[key][0][-1][1]:
-                continue
             row = list()
+            row_ = list()
             row.append(key)
-            for data in self.parcel_log[key][0]:
-                row.extend(data)
-            row.append('')
-            '''
-            for data in self.parcel_log[key][1]:
-                row.extend(data)
-            '''
-            wr.writerow(row)
+            row_.append(key)
+            if self.parcel_log[key][0][-1][1]:
+                for data in self.parcel_log[key][0]:
+                    row.extend(data)
+                wr.writerow(row)
 
         f.close()
 
