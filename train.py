@@ -3,7 +3,6 @@ from Agent_REINFORCE_V0 import Agent
 import numpy as np
 from tqdm import tqdm
 import csv
-import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     name = input('save_log file name : ')
@@ -20,7 +19,7 @@ if __name__ == "__main__":
     agent = Agent(state_size, action_size)
     sim = Simulation()
 
-    episodes, time_taken, scores, entropy_log = [], [], [], []
+    episodes, time_taken, scores, entropy_log, action_log = [], [], [], [], []
     episode_num = int(input('how many episodes? : '))
     MTE = int(input('parcels to move : '))
     # 에피소드 종료시키기 위해 이동시켜야 하는 소포 양
@@ -30,16 +29,16 @@ if __name__ == "__main__":
         score = 0
         time = 1
         sim.env.reset_network('data/data_road_V3.csv', 'data/data_hub_V3.csv')
-
+        action_log.append([0 for _ in range(8)])
         while done <= MTE:
             state = sim.get_state(time)
             for sample in state:
                 route = sample.pop()
                 s = np.reshape(sample, [1, state_size])
                 action = agent.get_action(s)
+                action_log[-1][action-1] += 1
                 sim.weight[sim.env.hub_data[route[0]][4]-25][sim.env.hub_data[route[1]][4]-25] = action
                 # 경로 따른 가중치(행동 선택) 설정
-
             sim.simulate(time)
             val = sim.get_result()
 
@@ -65,9 +64,12 @@ if __name__ == "__main__":
 
     f = open('study_log/'+name+'.csv', 'w', newline='')
     wr = csv.writer(f)
-    wr.writerow(['episode', 'score', 'entropy'])
+    wr.writerow(['episode', 'score', 'entropy',
+                 '(0,0,0)', '(1,0,0)', '(0,1,0)', '(0,0,1)',
+                 '(1,1,0)', '(1,0,1)', '(0,1,1)', '(1,1,1)'])
     for i in range(episode_num):
         row = list()
         row.extend([episodes[i], scores[i], entropy_log[i]])
+        row.extend(action_log[i])
         wr.writerow(row)
     f.close()
