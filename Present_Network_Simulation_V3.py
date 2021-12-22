@@ -171,9 +171,8 @@ class Simulation:
                         dist += self.data.parcel_log[key][1][j][2]
                         cost += self.data.parcel_log[key][1][j][2] / (self.data.parcel_log[key][1][j][3])
                     t = self.data.parcel_log[key][0][-1][1] - self.data.parcel_log[key][0][0][2]
-
                     reward = round((dist ** 2) / (cost * t))
-                    step.append((state, action, reward))
+                    step.append(((state, action, reward), (round(dist/t), round(cost/t))))
                 except ZeroDivisionError:
                     self.error += 1
 

@@ -19,7 +19,7 @@ if __name__ == "__main__":
     agent = Agent(state_size, action_size)
     sim = Simulation()
 
-    episodes, time_taken, scores, entropy_log, action_log = [], [], [], [], []
+    episodes, time_taken, scores, entropy_log, action_log, dists, costs = [], [], [], [], [], [], []
     episode_num = int(input('how many episodes? : '))
     MTE = int(input('parcels to move : '))
     # 에피소드 종료시키기 위해 이동시켜야 하는 소포 양
@@ -28,6 +28,7 @@ if __name__ == "__main__":
         done = 0
         score = 0
         time = 1
+        dist, cost = [], []
         sim.env.reset_network('data/data_road_V3.csv', 'data/data_hub_V3.csv')
         action_log.append([0 for _ in range(8)])
         while done <= MTE:
@@ -41,12 +42,13 @@ if __name__ == "__main__":
                 # 경로 따른 가중치(행동 선택) 설정
             sim.simulate(time)
             val = sim.get_result()
-
             if val:
                 for result in val:
                     done += 1
-                    action_made, reward = result[1], result[2]
-                    next_state = np.reshape(result[0], [1, state_size])
+                    action_made, reward = result[0][1], result[0][2]
+                    next_state = np.reshape(result[0][0], [1, state_size])
+                    dist.append(result[1][0])
+                    cost.append(result[1][1])
                     agent.append_sample(state, action_made, reward)
                     score += reward
 
@@ -57,19 +59,21 @@ if __name__ == "__main__":
         time_taken.append(time)
         scores.append(score)
         entropy_log.append(entropy)
+        dists.append(np.mean(dist))
+        costs.append(np.mean(cost))
         # print("episode: {:3d} | score: {:3d} | entropy: {:.3f}".format(time, score, entropy))
         agent.model.save_weights('save_model/model_01', save_format='tf')
-        # sim.save_simulation('211220_05_train')
+        sim.save_simulation(name)
         # sim.save_simulation('211214_{0:2d}'.format(e))
 
     f = open('study_log/'+name+'.csv', 'w', newline='')
     wr = csv.writer(f)
-    wr.writerow(['episode', 'score', 'entropy',
+    wr.writerow(['episode', 'dist', 'cost', 'score', 'entropy',
                  '(0,0,0)', '(1,0,0)', '(0,1,0)', '(0,0,1)',
                  '(1,1,0)', '(1,0,1)', '(0,1,1)', '(1,1,1)'])
     for i in range(episode_num):
         row = list()
-        row.extend([episodes[i], scores[i], entropy_log[i]])
+        row.extend([episodes[i], dists[i], costs[i], scores[i], entropy_log[i]])
         row.extend(action_log[i])
         wr.writerow(row)
     f.close()

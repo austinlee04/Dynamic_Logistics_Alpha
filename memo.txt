@@ -64,6 +64,7 @@ Note :
 
 21.12.22
 할 일 :
-- dist, cost 각각 log 저장
+- dist/t, cost/t 각각 log 저장
 - 학습 진행(100에피소드, MTE=12000)
 - 시뮬레이션 진행(action 1~8)
+- save_log 수정
