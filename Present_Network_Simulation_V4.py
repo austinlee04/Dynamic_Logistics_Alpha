@@ -18,8 +18,10 @@ class Simulation:
         self.error = 0
         # __ 상속 없이 가능???
 
-    def get_state(self, time):
+    def generator(self, time):
         self.routes = self.data.sample_maker(self.env.hub_ground_codes, random.randint(100, 400), time)
+
+    def get_state(self, time):
         state = []
         for sample in self.routes:
             s = list()
@@ -172,7 +174,7 @@ class Simulation:
                         cost += self.data.parcel_log[key][1][j][2] / (self.data.parcel_log[key][1][j][3])
                     t = self.data.parcel_log[key][0][-1][1] - self.data.parcel_log[key][0][0][2]
                     reward = round((dist ** 2) / (cost * t))
-                    step.append(((state, action, reward), (round(dist/t), round(cost/t))))
+                    step.append(((state, action, reward), (dist/t, cost/t)))
                 except ZeroDivisionError:
                     self.error += 1
 

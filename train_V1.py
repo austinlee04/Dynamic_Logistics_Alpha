@@ -1,4 +1,4 @@
-from Present_Network_Simulation_V3 import Simulation
+from Present_Network_Simulation_V4 import Simulation
 from Agent_REINFORCE_V0 import Agent
 import numpy as np
 from tqdm import tqdm
@@ -32,6 +32,8 @@ if __name__ == "__main__":
         sim.env.reset_network('data/data_road_V3.csv', 'data/data_hub_V3.csv')
         action_log.append([0 for _ in range(8)])
         while done <= MTE:
+            print(len(sim.data.parcel))
+            sim.generator(time)
             state = sim.get_state(time)
             for sample in state:
                 route = sample.pop()
@@ -46,12 +48,26 @@ if __name__ == "__main__":
                 for result in val:
                     done += 1
                     action_made, reward = result[0][1], result[0][2]
-                    next_state = np.reshape(result[0][0], [1, state_size])
+                    state = np.reshape(result[0][0], [1, state_size])
                     dist.append(result[1][0])
                     cost.append(result[1][1])
                     agent.append_sample(state, action_made, reward)
                     score += reward
-
+            time += 1
+        print('MTE')
+        while len(sim.data.parcel) > 50:
+            print(len(sim.data.parcel))
+            sim.simulate(time)
+            val = sim.get_result()
+            if val:
+                for result in val:
+                    done += 1
+                    action_made, reward = result[0][1], result[0][2]
+                    state = np.reshape(result[0][0], [1, state_size])
+                    dist.append(result[1][0])
+                    cost.append(result[1][1])
+                    agent.append_sample(state, action_made, reward)
+                    score += reward
             time += 1
 
         entropy = agent.train_model()
@@ -63,9 +79,9 @@ if __name__ == "__main__":
         costs.append(np.mean(cost))
         # print("episode: {:3d} | score: {:3d} | entropy: {:.3f}".format(time, score, entropy))
         agent.model.save_weights('save_model/model_01', save_format='tf')
-        sim.save_simulation(name)
         # sim.save_simulation('211214_{0:2d}'.format(e))
 
+    sim.save_simulation(name)
     f = open('study_log/'+name+'.csv', 'w', newline='')
     wr = csv.writer(f)
     wr.writerow(['episode', 'dist', 'cost', 'score', 'entropy',

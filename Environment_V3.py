@@ -65,7 +65,7 @@ class LogisticNetwork:
         done = list()
         k = 0
         for i in range(self.hub_data[hub][1]):
-            if not self.hub_data[hub][0]:
+            if not self.hub_data[hub][0] or len(self.hub_data[hub][0]) <= k:
                 break
             if self.hub_data[hub][0][0][1] == time:
                 done.append(self.hub_data[hub][0].popleft()[0])
