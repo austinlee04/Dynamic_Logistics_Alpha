@@ -126,7 +126,7 @@ class Simulation:
                 return False
             step = []
             for i in range(len(self.fin)):
-                try :
+                try:
                     key = self.fin.pop()
                     # get next state
                     state = list()

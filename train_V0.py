@@ -18,22 +18,25 @@ if __name__ == "__main__":
     action_size = len(actions)
     agent = Agent(state_size, action_size)
     sim = Simulation()
+    sim.reset_network()
 
     episodes, time_taken, scores, entropy_log, action_log, dists, costs = [], [], [], [], [], [], []
+    hub_log = dict()
+    for place in sim.env.hub_sky_codes:
+        hub_log[place] = [sim.env.hub_data[place][1]]
     episode_num = int(input('how many episodes? : '))
     MTE = int(input('parcels to move : '))
     # 에피소드 종료시키기 위해 이동시켜야 하는 소포 양
+    sim.save_state_log()
 
-    for e in tqdm(range(episode_num)):
+    for e in tqdm(range(1, episode_num+1)):
         done = 0
         score = 0
         time = 1
         dist, cost = [], []
-        sim.env.reset_network('data/data_road_V3.csv', 'data/data_hub_V3.csv')
+        sim.reset_network()
         action_log.append([0 for _ in range(8)])
         while done <= MTE:
-            print(len(sim.data.parcel))
-            sim.generator(time)
             state = sim.get_state(time)
             for sample in state:
                 route = sample.pop()
@@ -47,26 +50,25 @@ if __name__ == "__main__":
             if val:
                 for result in val:
                     done += 1
-                    action_made, reward = result[0][1], result[0][2]
-                    state = np.reshape(result[0][0], [1, state_size])
+                    first_state, action_made, reward = result[0][0], result[0][1], result[0][2]
                     dist.append(result[1][0])
                     cost.append(result[1][1])
-                    agent.append_sample(state, action_made, reward)
+                    first_state = np.reshape(first_state, [1, state_size])
+                    agent.append_sample(first_state, action_made, reward)
                     score += reward
             time += 1
-        print('MTE')
-        while len(sim.data.parcel) > 50:
-            print(len(sim.data.parcel))
+        left = len(sim.data.parcel.keys())
+        while len(sim.data.parcel.keys()) > round(left * 0.75):
             sim.simulate(time)
             val = sim.get_result()
             if val:
                 for result in val:
                     done += 1
-                    action_made, reward = result[0][1], result[0][2]
-                    state = np.reshape(result[0][0], [1, state_size])
+                    first_state, action_made, reward = result[0][0], result[0][1], result[0][2]
                     dist.append(result[1][0])
                     cost.append(result[1][1])
-                    agent.append_sample(state, action_made, reward)
+                    first_state = np.reshape(first_state, [1, state_size])
+                    agent.append_sample(first_state, action_made, reward)
                     score += reward
             time += 1
 
@@ -77,19 +79,26 @@ if __name__ == "__main__":
         entropy_log.append(entropy)
         dists.append(np.mean(dist))
         costs.append(np.mean(cost))
+        for place in sim.env.hub_sky_codes:
+            hub_log[place].append(np.mean(sim.state_log[place][1:]))
         # print("episode: {:3d} | score: {:3d} | entropy: {:.3f}".format(time, score, entropy))
         agent.model.save_weights('save_model/model_01', save_format='tf')
+        # sim.save_simulation('211220_05_train')
         # sim.save_simulation('211214_{0:2d}'.format(e))
 
-    sim.save_simulation(name)
     f = open('study_log/'+name+'.csv', 'w', newline='')
     wr = csv.writer(f)
-    wr.writerow(['episode', 'dist', 'cost', 'score', 'entropy',
-                 '(0,0,0)', '(1,0,0)', '(0,1,0)', '(0,0,1)',
-                 '(1,1,0)', '(1,0,1)', '(0,1,1)', '(1,1,1)'])
+    head = ['episode', 'dist', 'cost', 'score', 'entropy',
+            '(0,0,0)', '(1,0,0)', '(0,1,0)', '(0,0,1)',
+            '(1,1,0)', '(1,0,1)', '(0,1,1)', '(1,1,1)']
+    names = list(sim.env.hub_sky_codes)
+    head.extend(names)
+    wr.writerow(head)
     for i in range(episode_num):
         row = list()
         row.extend([episodes[i], dists[i], costs[i], scores[i], entropy_log[i]])
         row.extend(action_log[i])
+        for hub in names:
+            row.append(hub_log[hub][i+1])
         wr.writerow(row)
     f.close()

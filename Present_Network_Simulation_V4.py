@@ -12,28 +12,40 @@ class Simulation:
         self.speed = 20
         self.env = LogisticNetwork()
         self.data = DataManager()
-        self.weight = [[0 for _ in range(247)] for _ in range(247)]
+        self.weight = list()
         self.routes = list()
         self.fin = list()
         self.error = 0
+        self.state_log = dict()
         # __ 상속 없이 가능???
 
-    def generator(self, time):
-        self.routes = self.data.sample_maker(self.env.hub_ground_codes, random.randint(100, 400), time)
+    def save_state_log(self):
+        for name in self.env.hub_sky_codes:
+            self.state_log[name] = [self.env.hub_data[name][1]]
+
+    def reset_network(self):
+        self.env.reset_network('data/data_road_V3.csv', 'data/data_hub_V3.csv')
+        self.data.parcel = dict()
+        self.data.parcel_log = dict()
+        self.fin = []
+        self.weight = [[0 for _ in range(247)] for _ in range(247)]
 
     def get_state(self, time):
+        self.routes = self.data.sample_maker(self.env.hub_ground_codes, random.randint(60, 300), time)
+        for name in self.env.hub_sky_codes:
+            self.state_log[name].append(len(self.env.hub_data[name][0]))
         state = []
         for sample in self.routes:
             s = list()
-            s.append(round(len(self.env.hub_data[self.env.hub_data[sample[0]][3]][0]) / self.env.hub_data[self.env.hub_data[sample[0]][3]][1] * 100))
-            s.append(round(len(self.env.hub_data['중부권 광역우편물류센터'][0]) / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
-            s.append(round(len(self.env.hub_data[self.env.hub_data[sample[1]][3]][0]) / self.env.hub_data[self.env.hub_data[sample[1]][3]][1] * 100))
+            s.append(round(self.state_log[self.env.hub_data[sample[0]][3]][time] / self.state_log[self.env.hub_data[sample[0]][3]][0] * 100))
+            s.append(round(self.state_log['중부권 광역우편물류센터'][time] / self.state_log['중부권 광역우편물류센터'][0] * 100))
+            s.append(round(self.state_log[self.env.hub_data[sample[1]][3]][time] / self.state_log[self.env.hub_data[sample[1]][3]][0] * 100))
             tot = 0
             for name in self.env.hub_sky_codes:
                 if name == '중부권 광역우편물류센터':
                     continue
-                tot += round(len(self.env.hub_data[name][0]) / 2)
-            s.append(round(tot / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
+                tot += len(self.env.hub_data[name][0])
+            s.append(round(tot / self.state_log['중부권 광역우편물류센터'][0] * 50))
             s.append(sample)
             state.append(s)
         return state
@@ -128,53 +140,54 @@ class Simulation:
                 return False
             step = []
             for i in range(len(self.fin)):
-                try :
-                    key = self.fin.pop()
-                    # get next state
-                    state = list()
-                    dep = self.data.parcel_log[key][0][0][0]
-                    dep_top = self.env.hub_data[dep][3]
-                    arv = self.data.parcel_log[key][0][-1][0]
-                    arv_top = self.env.hub_data[arv][3]
-                    state.append(round(len(self.env.hub_data[dep_top][0]) / self.env.hub_data[dep_top][1] * 100))
-                    state.append(round(len(self.env.hub_data['중부권 광역우편물류센터'][0]) / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
-                    state.append(round(len(self.env.hub_data[arv_top][0]) / self.env.hub_data[arv_top][1] * 100))
-                    tot = 0
-                    for name in self.env.hub_sky_codes:
-                        if name == '중부권 광역우편물류센터':
-                            continue
-                        tot += round(len(self.env.hub_data[name][0]) / 2)
-                    state.append(round(tot / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
+                try:
+                    for key in self.fin:
+                        start_time = self.data.parcel_log[key][0][0][2]
+                        # get starting state
+                        state = list()
+                        dep = self.data.parcel_log[key][0][0][0]
+                        dep_top = self.env.hub_data[dep][3]
+                        arv = self.data.parcel_log[key][0][-1][0]
+                        arv_top = self.env.hub_data[arv][3]
+                        state.append(round(self.state_log[dep_top][start_time] / self.state_log[dep_top][0] * 100))
+                        state.append(round(self.state_log['중부권 광역우편물류센터'][start_time] / self.state_log['중부권 광역우편물류센터'][0] * 100))
+                        state.append(round(self.state_log[arv_top][start_time] / self.state_log[arv_top][0] * 100))
+                        tot = 0
+                        for name in self.env.hub_sky_codes:
+                            if name == '중부권 광역우편물류센터':
+                                continue
+                            tot += len(self.env.hub_data[name][0])
+                        state.append(round(tot / self.env.hub_data['중부권 광역우편물류센터'][1] * 50))
 
-                    # get action
-                    num = len(self.data.parcel_log[key][0])
-                    if num == 5:
-                        action = 8
-                    elif num == 4:
-                        if self.data.parcel_log[key][0][1][0] == '중부권 광역우편물류센터':
-                            action = 7
-                        elif self.data.parcel_log[key][0][2][0] == '중부권 광역우편물류센터':
-                            action = 5
+                        # get action
+                        num = len(self.data.parcel_log[key][0])
+                        if num == 5:
+                            action = 8
+                        elif num == 4:
+                            if self.data.parcel_log[key][0][1][0] == '중부권 광역우편물류센터':
+                                action = 7
+                            elif self.data.parcel_log[key][0][2][0] == '중부권 광역우편물류센터':
+                                action = 5
+                            else:
+                                action = 6
+                        elif num == 3:
+                            if self.data.parcel_log[key][0][1][0] == dep_top:
+                                action = 2
+                            elif self.data.parcel_log[key][0][1][0] == arv_top:
+                                action = 4
+                            else:
+                                action = 3
                         else:
-                            action = 6
-                    elif num == 3:
-                        if self.data.parcel_log[key][0][1][0] == dep_top:
-                            action = 2
-                        elif self.data.parcel_log[key][0][1][0] == arv_top:
-                            action = 4
-                        else:
-                            action = 3
-                    else:
-                        action = 1
+                            action = 1
 
-                    # get reward
-                    dist, cost = 0, 0
-                    for j in range(num-1):
-                        dist += self.data.parcel_log[key][1][j][2]
-                        cost += self.data.parcel_log[key][1][j][2] / (self.data.parcel_log[key][1][j][3])
-                    t = self.data.parcel_log[key][0][-1][1] - self.data.parcel_log[key][0][0][2]
-                    reward = round((dist ** 2) / (cost * t))
-                    step.append(((state, action, reward), (dist/t, cost/t)))
+                        # get reward
+                        dist, cost = 0, 0
+                        for j in range(num-1):
+                            dist += self.data.parcel_log[key][1][j][2]
+                            cost += self.data.parcel_log[key][1][j][2] / (self.data.parcel_log[key][1][j][3])
+                        t = self.data.parcel_log[key][0][-1][1] - self.data.parcel_log[key][0][0][2]
+                        reward = round((dist ** 2) / (cost * t))
+                        step.append(((state, action, reward), (dist, cost)))
                 except ZeroDivisionError:
                     self.error += 1
 

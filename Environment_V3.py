@@ -19,6 +19,8 @@ class LogisticNetwork:
         data_hub = csv.reader(f2)
         next(data_hub)
         next(data_road)
+        self.hub_ground_codes = []
+        self.hub_sky_codes = []
         for row in data_hub:
             if not row[0]:
                 break
