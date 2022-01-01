@@ -38,9 +38,9 @@ class Simulation:
     def path_finder(self, dep, arv):
         waypoint = list()
         waypoint.append(dep)
-        # waypoint.append(self.env.hub_data[dep][3])
+        waypoint.append(self.env.hub_data[dep][3])
         waypoint.append('중부권 광역우편물류센터')
-        # waypoint.append(self.env.hub_data[arv][3])
+        waypoint.append(self.env.hub_data[arv][3])
         waypoint.append(arv)
         return waypoint
 
@@ -117,59 +117,9 @@ class Simulation:
                         break
 
     def get_result(self):
-        if not self.fin:
-            return False
-        step = []
-        for i in range(len(self.fin)):
-            key = self.fin.pop()
-            # get next state
-            state = list()
-            dep = self.data.parcel_log[key][0][0][0]
-            dep_top = self.env.hub_data[dep][3]
-            arv = self.data.parcel_log[key][0][-1][0]
-            arv_top = self.env.hub_data[arv][3]
-            state.append(round(len(self.env.hub_data[dep_top][0]) / self.env.hub_data[dep_top][1] * 100))
-            state.append(round(len(self.env.hub_data['중부권 광역우편물류센터'][0]) / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
-            state.append(round(len(self.env.hub_data[arv_top][0]) / self.env.hub_data[arv_top][1] * 100))
-            tot = 0
-            for name in self.env.hub_sky_codes:
-                if name == '중부권 광역우편물류센터':
-                    continue
-                tot += round(len(self.env.hub_data[name][0]) / 2)
-            state.append(round(tot / self.env.hub_data['중부권 광역우편물류센터'][1] * 100))
-
-            # get action
-            num = len(self.data.parcel_log[key][0])
-            if num == 5:
-                action = 8
-            elif num == 4:
-                if self.data.parcel_log[key][0][1][0] == '중부권 광역우편물류센터':
-                    action = 7
-                elif self.data.parcel_log[key][0][2][0] == '중부권 광역우편물류센터':
-                    action = 5
-                else:
-                    action = 6
-            elif num == 3:
-                if self.data.parcel_log[key][0][1][0] == dep_top:
-                    action = 2
-                elif self.data.parcel_log[key][0][1][0] == arv_top:
-                    action = 4
-                else:
-                    action = 3
-            else:
-                action = 1
-
-            # get reward
-            dist, cost = 0, 0
-            for j in range(num-1):
-                dist += self.data.parcel_log[key][1][j][2]
-                cost += self.data.parcel_log[key][1][j][2] / (self.data.parcel_log[key][1][j][3])
-            t = self.data.parcel_log[key][0][-1][1] - self.data.parcel_log[key][0][0][2]
-            reward = round((dist ** 2) / (cost * t))
-
-            step.append((state, action, reward))
-
-        return step
+        done = len(self.fin)
+        self.fin = []
+        return done
 
     def save_simulation(self, name):
         self.data.save_log('HnS_simulation_'+name)

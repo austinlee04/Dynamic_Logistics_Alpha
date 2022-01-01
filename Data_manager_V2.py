@@ -39,7 +39,7 @@ class DataManager:
                      '도착지', '도착시간'])
 
         for key in self.parcel_log.keys():
-            if self.parcel_log[key][0][1]:
+            if self.parcel_log[key][0][-1][1]:
                 row = list()
                 row.append(key)                                    # 택배번호
                 row.append(self.parcel_log[key][0][0][0])          # 출발지
@@ -47,7 +47,7 @@ class DataManager:
                     row.append(self.parcel_log[key][0][i][2])       # 출발시간
                     row.append(self.parcel_log[key][0][i+1][1])     # 도착시간
                     row.extend(self.parcel_log[key][1][i][2:])      # (도로 운송) 거리, 구간 통행량
-                    row.append(self.parcel_log[key][1][i][2])       # 경유지
+                    row.append(self.parcel_log[key][1][i][1])       # 경유지
                 wr.writerow(row)
 
         f.close()

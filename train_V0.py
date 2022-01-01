@@ -58,8 +58,7 @@ if __name__ == "__main__":
                     score += reward
             time += 1
         left = len(sim.data.parcel.keys())
-        # while len(sim.data.parcel.keys()) > round(left * 0.75):
-        while sim.data.parcel.keys():
+        while len(sim.data.parcel.keys()) > round(left * 0.75):
             print(len(sim.data.parcel.keys()))
             sim.simulate(time)
             val = sim.get_result()
@@ -85,7 +84,7 @@ if __name__ == "__main__":
             hub_log[place].append(np.mean(sim.state_log[place][1:]))
         # print("episode: {:3d} | score: {:3d} | entropy: {:.3f}".format(time, score, entropy))
         agent.model.save_weights('save_model/model_01', save_format='tf')
-        # sim.save_simulation('211220_05_train')
+        sim.save_simulation(name)
         # sim.save_simulation('211214_{0:2d}'.format(e))
 
     f = open('study_log/'+name+'.csv', 'w', newline='')

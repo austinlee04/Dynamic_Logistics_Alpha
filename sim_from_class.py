@@ -25,7 +25,16 @@ if __name__ == "__main__":
     while done <= MTE:
         sim.get_state(t)
         sim.simulate(t)
+        done += sim.get_result()
         t += 1
+        print(len(sim.data.parcel.keys()))
+    left = len(sim.data.parcel.keys())
+    print('MTE')
+    while len(sim.data.parcel.keys()) > round(left * 0.75):
+        sim.simulate(t)
+        done += sim.get_result()
+        t += 1
+        print(len(sim.data.parcel.keys()))
 
     # print(time)
-    sim.save_simulation('211221_04_sim(type3)')
+    sim.save_simulation(name)

@@ -31,7 +31,8 @@ class Simulation:
         self.weight = [[0 for _ in range(247)] for _ in range(247)]
 
     def get_state(self, time):
-        self.routes = self.data.sample_maker(self.env.hub_ground_codes, random.randint(60, 300), time)
+        self.routes = self.data.sample_maker(self.env.hub_ground_codes, random.randint(200, 500), time)
+        # (60, 300) or (200, 500)
         for name in self.env.hub_sky_codes:
             self.state_log[name].append(len(self.env.hub_data[name][0]))
         state = []
