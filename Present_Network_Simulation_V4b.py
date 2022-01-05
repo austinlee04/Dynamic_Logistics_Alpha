@@ -2,6 +2,8 @@ from Environment_V3 import LogisticNetwork
 from Data_manager_V2 import DataManager
 import networkx as nx
 import random
+import numpy as np
+from collections import deque
 
 
 # class Simulation(LogisticNetwork, DataManager):
@@ -12,10 +14,9 @@ class Simulation:
         self.speed = 20
         self.env = LogisticNetwork()
         self.data = DataManager()
-        self.weight = list()
-        self.routes = list()
-        self.fin = list()
-        self.error = 0
+        self.weight = np.array([])
+        self.routes = deque()
+        self.fin = deque()
         self.state_log = dict()
         # __ 상속 없이 가능???
 
@@ -27,8 +28,8 @@ class Simulation:
         self.env.reset_network('data/data_road_V3.csv', 'data/data_hub_V3.csv')
         self.data.parcel = dict()
         self.data.parcel_log = dict()
-        self.fin = []
-        self.weight = [[0 for _ in range(247)] for _ in range(247)]
+        self.fin.clear()
+        self.weight = np.zeros((247, 247), dtype=np.int64)
         self.state_log = dict()
 
     def get_state(self, time):
@@ -191,7 +192,7 @@ class Simulation:
                         reward = round((dist ** 2) / (cost * t))
                         step.append(((state, action, reward), (dist, cost)))
                 except ZeroDivisionError:
-                    self.error += 1
+                    pass
 
             return step
 

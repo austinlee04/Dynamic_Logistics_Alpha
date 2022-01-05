@@ -39,6 +39,7 @@ class Simulation:
         state = []
         for sample in self.routes:
             s = list()
+            s.append(round(nx.shortest_path_length(self.env.network, sample[0], sample[1], weight='weight')))
             s.append(round(self.state_log[self.env.hub_data[sample[0]][3]][time] / self.state_log[self.env.hub_data[sample[0]][3]][0] * 100))
             s.append(round(self.state_log['중부권 광역우편물류센터'][time] / self.state_log['중부권 광역우편물류센터'][0] * 100))
             s.append(round(self.state_log[self.env.hub_data[sample[1]][3]][time] / self.state_log[self.env.hub_data[sample[1]][3]][0] * 100))
@@ -50,6 +51,7 @@ class Simulation:
             s.append(round(tot / self.state_log['중부권 광역우편물류센터'][0] * 50))
             s.append(sample)
             state.append(s)
+            # state = [거리, 권역허브(출발지), 중심허브, 권역허브(도착지), 권역허브 전체, (경로)]
         return state
 
     def path_finder(self, dep, arv):
@@ -144,6 +146,7 @@ class Simulation:
             for i in range(len(self.fin)):
                 try:
                     for key in self.fin:
+                        # state = [최단거리, 권역허브(출발지), 중심허브, 권역허브(도착지), 권역허브 전체]
                         start_time = self.data.parcel_log[key][0][0][2]
                         # get starting state
                         state = list()
@@ -151,6 +154,7 @@ class Simulation:
                         dep_top = self.env.hub_data[dep][3]
                         arv = self.data.parcel_log[key][0][-1][0]
                         arv_top = self.env.hub_data[arv][3]
+                        state.append(nx.shortest_path_length(self.env.network, dep, arv, weight='weight'))
                         state.append(round(self.state_log[dep_top][start_time] / self.state_log[dep_top][0] * 100))
                         state.append(round(self.state_log['중부권 광역우편물류센터'][start_time] / self.state_log['중부권 광역우편물류센터'][0] * 100))
                         state.append(round(self.state_log[arv_top][start_time] / self.state_log[arv_top][0] * 100))

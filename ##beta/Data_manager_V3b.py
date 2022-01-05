@@ -1,6 +1,6 @@
 import random
 import pandas as pd
-from Environment_V4_ import LogisticNetwork
+from Environment_V4b import LogisticNetwork
 
 env = LogisticNetwork()
 MAX = 10 ** 4

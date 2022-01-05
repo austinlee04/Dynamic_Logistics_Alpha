@@ -1,12 +1,12 @@
-from Present_Network_Simulation_V4 import Simulation
-from Agent_REINFORCE_V0 import Agent
+from Present_Network_Simulation_V5b import Simulation
+from Agent_REINFORCE_V1b import Agent
 import numpy as np
 from tqdm import tqdm
 import csv
 
 if __name__ == "__main__":
     name = input('save_log file name : ')
-    state_size = 4
+    state_size = 5
     # 각 허브의 포화도
     actions = [1, 2, 3, 4, 5, 6, 7, 8]
     '''
@@ -58,7 +58,9 @@ if __name__ == "__main__":
                     agent.append_sample(first_state, action_made, reward)
                     score += reward
             time += 1
+            print(len(sim.data.parcel.keys()))
         left = len(sim.data.parcel.keys())
+        print('MTE\n\n\n')
         while len(sim.data.parcel.keys()) > round(left * 0.75):
             sim.simulate(time)
             val = sim.get_result()
@@ -83,7 +85,7 @@ if __name__ == "__main__":
         for place in sim.env.hub_sky_codes:
             hub_log[place].append(np.mean(sim.state_log[place][1:]))
         # print("episode: {:3d} | score: {:3d} | entropy: {:.3f}".format(time, score, entropy))
-        agent.model.save_weights('save_model/model_03', save_format='tf')
+        agent.model.save_weights('save_model/model_02', save_format='tf')
         # sim.save_simulation(name)
         # sim.save_simulation('211214_{0:2d}'.format(e))
 
